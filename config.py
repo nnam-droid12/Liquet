@@ -62,10 +62,12 @@ class Settings(BaseSettings):
     data_dir: Path = Path(__file__).parent / "data"
     cases_dir: Path = Path(__file__).parent / "data" / "cases"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+        "protected_namespaces": ("settings_",),
+    }
 
 
 @lru_cache(maxsize=1)
