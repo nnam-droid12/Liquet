@@ -1,0 +1,76 @@
+{
+  "ORD-001": [
+    {"ts": "2025-11-08T18:00:00Z", "from": "buyer", "text": "I just received the jacket but the color is dark grey, not brown like in the listing photos."},
+    {"ts": "2025-11-08T20:15:00Z", "from": "seller", "text": "That's impossible — I shipped the exact item from the photos. The color is brown leather, it may look different under indoor lighting."},
+    {"ts": "2025-11-09T09:00:00Z", "from": "buyer", "text": "I've attached photos. This is clearly grey, not brown. I want a refund."},
+    {"ts": "2025-11-09T11:30:00Z", "from": "seller", "text": "I see your photo. This is the same jacket. Lighting and camera settings make leather look different. No refund warranted."}
+  ],
+  "ORD-002": [
+    {"ts": "2025-11-13T10:00:00Z", "from": "buyer", "text": "Received the headset but it won't connect. Tried both USB and 3.5mm. Dead on arrival."},
+    {"ts": "2025-11-13T14:00:00Z", "from": "seller", "text": "Sorry to hear that. Please try holding the power button for 10 seconds to reset. Also ensure USB dongle is plugged into USB 3.0 port."},
+    {"ts": "2025-11-13T16:30:00Z", "from": "buyer", "text": "Tried everything. Still completely dead. I need a replacement or full refund."},
+    {"ts": "2025-11-13T18:00:00Z", "from": "seller", "text": "I tested this item before shipping and it worked perfectly. I believe you may have damaged it."}
+  ],
+  "ORD-003": [
+    {"ts": "2025-11-05T12:00:00Z", "from": "buyer", "text": "The ceramic set arrived — 3 of the 6 cups are broken. The packaging wasn't adequate for fragile items."},
+    {"ts": "2025-11-05T15:00:00Z", "from": "seller", "text": "I'm so sorry! I packaged everything carefully but USPS must have damaged it in transit. I have insurance. Please file a claim and I'll help."},
+    {"ts": "2025-11-05T17:00:00Z", "from": "buyer", "text": "I've taken photos of all broken pieces and the packaging. What do we do next?"},
+    {"ts": "2025-11-06T09:00:00Z", "from": "seller", "text": "Please send the photos. I'll contact USPS and we'll get you a partial refund for the broken items."}
+  ],
+  "ORD-004": [
+    {"ts": "2025-11-18T09:00:00Z", "from": "buyer", "text": "The lens arrived but there is a large scratch on the front element that wasn't disclosed. This significantly affects image quality."},
+    {"ts": "2025-11-18T11:00:00Z", "from": "seller", "text": "There was NO scratch when I shipped it. I inspected it carefully. The listing says 'excellent condition' and that was accurate."},
+    {"ts": "2025-11-18T14:00:00Z", "from": "buyer", "text": "I have unboxing video showing the scratch was there when I opened it. $649 and I got a damaged lens."},
+    {"ts": "2025-11-18T16:00:00Z", "from": "seller", "text": "A video can be staged. I won't issue a refund for damage you may have caused."}
+  ],
+  "ORD-005": [
+    {"ts": "2025-11-25T08:00:00Z", "from": "buyer", "text": "It's been 10 days and my yoga mat hasn't arrived. Tracking hasn't updated in 5 days."},
+    {"ts": "2025-11-25T10:00:00Z", "from": "seller", "text": "Tracking shows it's in transit. Sometimes USPS is slow. Please wait a few more days."},
+    {"ts": "2025-11-28T09:00:00Z", "from": "buyer", "text": "Still nothing. Tracking still frozen. I want a refund."},
+    {"ts": "2025-11-28T12:00:00Z", "from": "seller", "text": "According to tracking it's been shipped and is on the way. I am not responsible for carrier delays."}
+  ],
+  "ORD-CLEAR-001": [
+    {"ts": "2025-11-21T08:00:00Z", "from": "buyer", "text": "It has been 20 days and my order never arrived. Tracking has been stuck in transit for over 2 weeks with no update."},
+    {"ts": "2025-11-21T10:00:00Z", "from": "seller", "text": "I shipped it on time. The carrier must have lost it. I am not responsible for what happens after pickup."}
+  ],
+  "ORD-CLEAR-002": [
+    {"ts": "2025-11-09T10:00:00Z", "from": "buyer", "text": "I never received my jacket. I want a full refund."},
+    {"ts": "2025-11-09T12:00:00Z", "from": "seller", "text": "FedEx tracking shows delivery at 2:32pm on Nov 8 with signature J. DOE at your address. You signed for it."}
+  ],
+  "ORD-CLEAR-003": [
+    {"ts": "2025-11-05T12:00:00Z", "from": "buyer", "text": "3 of the 6 ceramic cups arrived completely broken. The box was crushed. I have photos."},
+    {"ts": "2025-11-05T15:00:00Z", "from": "seller", "text": "I'm sorry! I packed each cup individually but USPS must have dropped the package. Happy to issue partial refund for broken items."}
+  ],
+  "ORD-CLEAR-004": [
+    {"ts": "2025-11-13T10:00:00Z", "from": "buyer", "text": "I ordered a size Medium blue dress but received a size XXL red shirt. Completely wrong item."},
+    {"ts": "2025-11-13T14:00:00Z", "from": "seller", "text": "I apologize, I may have mixed up orders. I'll investigate my inventory."}
+  ],
+  "ORD-BORDER-001": [
+    {"ts": "2025-11-08T18:00:00Z", "from": "buyer", "text": "The leather jacket I received is dark grey. The listing shows brown leather. I have photos comparing both."},
+    {"ts": "2025-11-08T20:15:00Z", "from": "seller", "text": "The jacket IS brown — it photographs differently under different lighting. This is the exact same jacket from the listing."},
+    {"ts": "2025-11-09T09:00:00Z", "from": "buyer", "text": "My photo is taken in natural daylight. It is clearly grey/charcoal not brown."},
+    {"ts": "2025-11-09T11:30:00Z", "from": "seller", "text": "Leather color varies by lighting and camera settings. No misrepresentation occurred."}
+  ],
+  "ORD-CLEAR-008": [
+    {"ts": "2025-11-13T10:00:00Z", "from": "buyer", "text": "Received the gaming headset but it is dead on arrival. Will not power on. Tried USB 3.0, different computers, 10-second reset. Listed as brand new but clearly has a defect."},
+    {"ts": "2025-11-13T14:00:00Z", "from": "seller", "text": "I tested it before shipping and it worked. You must have damaged it or connected it incorrectly."}
+  ],
+  "ORD-BORDER-002": [
+    {"ts": "2025-11-25T08:00:00Z", "from": "buyer", "text": "My yoga mat has been stuck in transit for 10 days. No update. Estimated delivery was 5 days ago."},
+    {"ts": "2025-11-25T10:00:00Z", "from": "seller", "text": "Tracking shows it was picked up and is in transit. Please wait a few more days before escalating."}
+  ],
+  "ORD-5050-001": [
+    {"ts": "2025-11-18T09:00:00Z", "from": "buyer", "text": "I recorded my unboxing on video. The moment I removed the lens it had a large scratch on the front element. It was there before I even touched it. I need a full refund."},
+    {"ts": "2025-11-18T11:00:00Z", "from": "seller", "text": "I have inspection photos taken 1 hour before shipping to DHL. The glass was perfect with zero scratches. 8 years of selling cameras, zero complaints. The buyer caused this damage after unboxing."},
+    {"ts": "2025-11-18T14:00:00Z", "from": "buyer", "text": "I can provide the timestamped video as evidence. The scratch is clearly visible the instant the box opens."},
+    {"ts": "2025-11-18T16:00:00Z", "from": "seller", "text": "Videos can be staged or edited. My photos are from the same day with EXIF metadata. I refuse any refund."}
+  ],
+  "ORD-HIGH-001": [
+    {"ts": "2025-12-05T08:00:00Z", "from": "buyer", "text": "I paid $649 for a camera lens and tracking has been frozen for 25 days. It never arrived."},
+    {"ts": "2025-12-05T10:00:00Z", "from": "seller", "text": "I shipped on time. The carrier must have lost it. I'm not responsible for carrier delays."}
+  ],
+  "ORD-CLEAR-010": [
+    {"ts": "2025-11-19T10:00:00Z", "from": "buyer", "text": "I received what appears to be a counterfeit watch. The serial number does not exist in the brand's database, the logo font is wrong, and the movement sounds wrong. I have expert verification."},
+    {"ts": "2025-11-19T14:00:00Z", "from": "seller", "text": "It is genuine. I bought it from a trusted wholesaler with full documentation."}
+  ]
+}
