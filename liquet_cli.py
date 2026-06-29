@@ -140,9 +140,7 @@ def _fmt_row(label: str, value: str, width: int = 20) -> str:
 
 
 def _gate_color(gate: str) -> str:
-    if gate == "LIQUET":
-        return f"\033[32m{gate}\033[0m"
-    return f"\033[33m{gate}\033[0m"
+    return gate
 
 
 async def _get_or_create_dispute(
@@ -181,9 +179,9 @@ async def cmd_investigate(order_id: str) -> None:
         orch = DisputeOrchestrator(session)
         decision = await orch.run(dispute)
 
-    print("\n" + "─" * 60)
+    print("\n" + "-" * 60)
     print("RESULT")
-    print("─" * 60)
+    print("-" * 60)
     print(_fmt_row("Gate:", _gate_color(decision.gate_result.value)))
     print(_fmt_row("Resolution:", decision.verdict.resolution.value.replace("_", " ")))
     print(_fmt_row("Confidence:", f"{decision.verdict.confidence:.0%}"))
@@ -194,7 +192,7 @@ async def cmd_investigate(order_id: str) -> None:
     print(f"  {decision.verdict.rationale}")
     if decision.verdict.policy_clauses:
         print(_fmt_row("Policy clauses:", ", ".join(decision.verdict.policy_clauses)))
-    print("─" * 60)
+    print("-" * 60)
 
 
 async def cmd_batch() -> None:
@@ -235,9 +233,9 @@ async def cmd_batch() -> None:
                 results.append({"order_id": order_id, "gate": "ERROR", "resolution": str(exc)[:40], "confidence": 0.0, "status": "error"})
                 print(f"ERROR: {exc}")
 
-    print("\n" + "─" * 72)
+    print("\n" + "-" * 72)
     print(f"{'Order':<18} {'Gate':<14} {'Resolution':<22} {'Conf':>6}")
-    print("─" * 72)
+    print("-" * 72)
     liquet_n = 0
     for r in results:
         gate_str = r["gate"]
@@ -245,7 +243,7 @@ async def cmd_batch() -> None:
             liquet_n += 1
         conf_str = f"{r['confidence']:.0%}" if r["confidence"] else "—"
         print(f"{r['order_id']:<18} {gate_str:<14} {r['resolution']:<22} {conf_str:>6}")
-    print("─" * 72)
+    print("-" * 72)
     total = len(results)
     print(f"LIQUET (auto-resolved): {liquet_n}/{total}   NON LIQUET (escalated): {total - liquet_n}/{total}")
 
@@ -262,7 +260,7 @@ async def cmd_list() -> None:
         return
 
     print(f"\n{'ID':<10} {'Order':<15} {'Type':<20} {'Status':<15} {'Gate':<14} {'Conf':>6}")
-    print("─" * 84)
+    print("-" * 84)
     for d in disputes:
         async with AsyncSessionLocal() as session:
             dec_repo = DecisionRepository(session)
