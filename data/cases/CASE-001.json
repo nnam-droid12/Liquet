@@ -1,0 +1,23 @@
+{
+  "id": "CASE-001",
+  "label": "clear_never_arrived",
+  "expected_resolution": "full_refund",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-001",
+    "dispute_type": "never_arrived",
+    "buyer_id": "USR-B001",
+    "seller_id": "USR-S001",
+    "buyer_narrative": "I ordered a phone case 3 weeks ago and it has never arrived. Tracking shows it was picked up but has been stuck 'in transit' for 20 days with no delivery scan.",
+    "seller_narrative": "I shipped the item on time. The carrier must have lost it. I can't control what happens after pickup.",
+    "metadata": {
+      "evidence_images": []
+    }
+  },
+  "synthetic_tracking": {
+    "status": "in_transit",
+    "delivered_at": null,
+    "days_stalled": 20
+  }
+}

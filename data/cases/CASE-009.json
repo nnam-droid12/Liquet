@@ -1,0 +1,23 @@
+{
+  "id": "CASE-009",
+  "label": "borderline_stalled_tracking",
+  "expected_resolution": "escalate",
+  "expected_gate": "NON_LIQUET",
+  "difficulty": "borderline",
+  "dispute": {
+    "order_id": "ORD-BORDER-002",
+    "dispute_type": "never_arrived",
+    "buyer_id": "USR-B009",
+    "seller_id": "USR-S009",
+    "buyer_narrative": "My yoga mat has been stuck 'in transit' for 10 days. The tracking hasn't updated and the estimated delivery was 5 days ago.",
+    "seller_narrative": "Tracking shows it was picked up and is in transit. USPS sometimes has delays. Please wait a few more days before escalating.",
+    "metadata": {
+      "evidence_images": []
+    }
+  },
+  "synthetic_tracking": {
+    "status": "in_transit",
+    "days_stalled": 10,
+    "delivered_at": null
+  }
+}

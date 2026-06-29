@@ -1,0 +1,22 @@
+{
+  "id": "CASE-004",
+  "label": "clear_wrong_item",
+  "expected_resolution": "full_refund",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-004",
+    "dispute_type": "wrong_item",
+    "buyer_id": "USR-B004",
+    "seller_id": "USR-S004",
+    "buyer_narrative": "I ordered a size Medium blue dress but received a size XXL red shirt. Completely wrong item. Photos attached.",
+    "seller_narrative": "I may have mixed up the orders. I'll need to investigate my inventory.",
+    "metadata": {
+      "evidence_images": []
+    }
+  },
+  "synthetic_tracking": {
+    "status": "delivered",
+    "delivered_at": "2025-11-10T10:00:00Z"
+  }
+}

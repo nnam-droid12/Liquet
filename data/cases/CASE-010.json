@@ -1,0 +1,20 @@
+{
+  "id": "CASE-010",
+  "label": "clear_counterfeit",
+  "expected_resolution": "full_refund",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-010",
+    "dispute_type": "counterfeit",
+    "buyer_id": "USR-B010",
+    "seller_id": "USR-S010",
+    "buyer_narrative": "I received what appears to be a counterfeit luxury watch. The serial number doesn't exist in the brand's database, the logo font is wrong, and the movement sounds wrong. I have expert verification photos.",
+    "seller_narrative": "It's genuine. I bought it from a trusted wholesaler.",
+    "metadata": {
+      "evidence_images": [
+        "https://example.com/counterfeit_evidence.jpg"
+      ]
+    }
+  }
+}

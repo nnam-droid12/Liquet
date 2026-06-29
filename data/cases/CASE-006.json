@@ -1,0 +1,40 @@
+{
+  "id": "CASE-006",
+  "label": "engineered_fifty_fifty",
+  "expected_resolution": "escalate",
+  "expected_gate": "NON_LIQUET",
+  "difficulty": "fifty_fifty",
+  "notes": "DEMO SHOWSTOPPER: buyer has unboxing video showing scratch; seller has pre-ship inspection photo showing no scratch. Neither can be verified as authentic. Carrier delivered. Camera lens at $649.",
+  "dispute": {
+    "order_id": "ORD-5050-001",
+    "dispute_type": "not_as_described",
+    "buyer_id": "USR-B006",
+    "seller_id": "USR-S006",
+    "buyer_narrative": "I recorded my unboxing on video. The moment I removed the lens from the box it was visibly scratched on the front element. The scratch was there before I touched it. $649 for a damaged lens \u2014 I need a full refund.",
+    "seller_narrative": "I have detailed inspection photos taken on the day of shipping, one hour before I handed it to DHL. The glass was perfect. I've been selling cameras for 8 years with zero complaints. The buyer must have dropped it after unboxing and is staging a claim. I refuse any refund.",
+    "metadata": {
+      "evidence_images": [
+        "https://example.com/buyer_unboxing_scratch.jpg",
+        "https://example.com/seller_preship_no_scratch.jpg"
+      ],
+      "hard_contradiction": true
+    }
+  },
+  "synthetic_vision": {
+    "photo_1": {
+      "damage_detected": true,
+      "observations": [
+        "Scratch visible on front lens element"
+      ],
+      "confidence": 0.78
+    },
+    "photo_2": {
+      "damage_detected": false,
+      "observations": [
+        "Lens element appears clean and undamaged in this photo"
+      ],
+      "confidence": 0.75
+    }
+  },
+  "hard_contradiction": "Buyer's unboxing video shows scratch present; seller's pre-ship photo shows no scratch. Both sources have moderate reliability. Cannot determine which is authentic."
+}

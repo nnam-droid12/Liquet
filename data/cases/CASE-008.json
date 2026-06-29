@@ -1,0 +1,22 @@
+{
+  "id": "CASE-008",
+  "label": "clear_doa_electronics",
+  "expected_resolution": "replacement",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-008",
+    "dispute_type": "not_as_described",
+    "buyer_id": "USR-B008",
+    "seller_id": "USR-S008",
+    "buyer_narrative": "The gaming headset arrived dead on arrival. Will not power on despite trying USB 3.0, different computers, and a 10-second reset. The item was listed as 'brand new' but it clearly has a defect.",
+    "seller_narrative": "I tested it before shipping and it worked. This must be user error or damage the buyer caused.",
+    "metadata": {
+      "evidence_images": []
+    }
+  },
+  "synthetic_tracking": {
+    "status": "delivered",
+    "delivered_at": "2025-11-12T10:15:00Z"
+  }
+}

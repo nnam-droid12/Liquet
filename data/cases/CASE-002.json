@@ -1,0 +1,23 @@
+{
+  "id": "CASE-002",
+  "label": "clear_delivered_deny",
+  "expected_resolution": "deny",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-002",
+    "dispute_type": "never_arrived",
+    "buyer_id": "USR-B002",
+    "seller_id": "USR-S002",
+    "buyer_narrative": "I never received my jacket. I want a full refund.",
+    "seller_narrative": "FedEx tracking shows delivery at 2:32pm with signature J. DOE at the buyer's address.",
+    "metadata": {
+      "evidence_images": []
+    }
+  },
+  "synthetic_tracking": {
+    "status": "delivered",
+    "delivered_at": "2025-11-08T14:32:00Z",
+    "signed_by": "J. DOE"
+  }
+}

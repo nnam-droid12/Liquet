@@ -1,0 +1,27 @@
+{
+  "id": "CASE-003",
+  "label": "clear_damaged_partial",
+  "expected_resolution": "partial_refund",
+  "expected_gate": "LIQUET",
+  "difficulty": "clear",
+  "dispute": {
+    "order_id": "ORD-CLEAR-003",
+    "dispute_type": "damaged",
+    "buyer_id": "USR-B003",
+    "seller_id": "USR-S003",
+    "buyer_narrative": "3 of the 6 ceramic cups arrived broken. The box was clearly crushed. I have photos showing the damage and crushed packaging.",
+    "seller_narrative": "I packaged everything carefully with bubble wrap. USPS must have dropped the package. I'm not responsible for carrier damage.",
+    "metadata": {
+      "evidence_images": [
+        "https://example.com/broken_cups_damage.jpg"
+      ]
+    }
+  },
+  "synthetic_vision": {
+    "damage_detected": true,
+    "observations": [
+      "3 ceramic cups show clear breakage",
+      "Package exterior shows impact deformation"
+    ]
+  }
+}

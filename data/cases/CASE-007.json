@@ -1,0 +1,25 @@
+{
+  "id": "CASE-007",
+  "label": "high_value_escalate",
+  "expected_resolution": "full_refund",
+  "expected_gate": "NON_LIQUET",
+  "difficulty": "high_value",
+  "notes": "Clear case but order value $649 triggers V-001 policy escalation.",
+  "dispute": {
+    "order_id": "ORD-HIGH-001",
+    "dispute_type": "never_arrived",
+    "buyer_id": "USR-B007",
+    "seller_id": "USR-S007",
+    "buyer_narrative": "I paid $649 for a camera lens and tracking has been stuck for 25 days. Never delivered.",
+    "seller_narrative": "I shipped it. The carrier must have lost it.",
+    "metadata": {
+      "evidence_images": [],
+      "order_value_override": 649.0
+    }
+  },
+  "synthetic_tracking": {
+    "status": "in_transit",
+    "delivered_at": null,
+    "days_stalled": 25
+  }
+}

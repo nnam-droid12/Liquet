@@ -1,0 +1,29 @@
+{
+  "id": "CASE-005",
+  "label": "borderline_color_mismatch",
+  "expected_resolution": "partial_refund",
+  "expected_gate": "NON_LIQUET",
+  "difficulty": "borderline",
+  "dispute": {
+    "order_id": "ORD-BORDER-001",
+    "dispute_type": "not_as_described",
+    "buyer_id": "USR-B005",
+    "seller_id": "USR-S005",
+    "buyer_narrative": "The leather jacket I received is dark grey. The listing shows brown leather. This is a clear misrepresentation. I have photos of what I received next to the listing photo.",
+    "seller_narrative": "The jacket IS brown \u2014 it photographs differently under different lighting conditions. Leather color perception varies widely. This is the same jacket from the listing. No refund is warranted.",
+    "metadata": {
+      "evidence_images": [
+        "https://example.com/grey_jacket_buyer_photo.jpg"
+      ]
+    }
+  },
+  "synthetic_vision": {
+    "damage_detected": false,
+    "color_observed": "grey/charcoal",
+    "observations": [
+      "Jacket appears grey-charcoal in this lighting",
+      "No visible damage"
+    ],
+    "confidence": 0.7
+  }
+}
