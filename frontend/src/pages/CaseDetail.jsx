@@ -122,15 +122,39 @@ export default function CaseDetail() {
     return stopPolling
   }, [disputeId])
 
-  const handleInvestigate = async () => {
+  const handleInvestigate = () => {
     setInvestigating(true)
-    startPolling()
+    // Try WebSocket streaming; fall back to REST polling
+    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
+    const wsUrl = `${proto}://localhost:8080/ws/disputes/${disputeId}/stream`
+    let ws
     try {
-      await fetch(`/api/disputes/${disputeId}/investigate`, { method: 'POST' })
-    } finally {
-      stopPolling()
-      await load()
-      setInvestigating(false)
+      ws = new WebSocket(wsUrl)
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data)
+        if (msg.type === 'audit') {
+          setAudit(prev => {
+            if (prev.find(e => e.id === msg.entry.id)) return prev
+            return [...prev, msg.entry]
+          })
+          auditEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        } else if (msg.type === 'done' || msg.type === 'error') {
+          ws.close()
+          stopPolling()
+          load().then(() => setInvestigating(false))
+        }
+      }
+      ws.onerror = () => {
+        // WS unavailable — fall back to REST polling
+        ws = null
+        startPolling()
+        fetch(`/api/disputes/${disputeId}/investigate`, { method: 'POST' })
+          .then(() => { stopPolling(); load().then(() => setInvestigating(false)) })
+      }
+    } catch {
+      startPolling()
+      fetch(`/api/disputes/${disputeId}/investigate`, { method: 'POST' })
+        .then(() => { stopPolling(); load().then(() => setInvestigating(false)) })
     }
   }
 

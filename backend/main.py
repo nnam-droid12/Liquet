@@ -20,6 +20,7 @@ from backend.api.disputes import router as disputes_router
 from backend.api.cases import router as cases_router
 from backend.api.queue import router as queue_router
 from backend.api.health import router as health_router
+from backend.api.ws import router as ws_router
 from backend.repositories.database import init_db
 from config import settings
 
@@ -75,6 +76,7 @@ app.include_router(health_router)
 app.include_router(disputes_router, prefix="/api/disputes", tags=["disputes"])
 app.include_router(cases_router, prefix="/api/cases", tags=["cases"])
 app.include_router(queue_router, prefix="/api/queue", tags=["queue"])
+app.include_router(ws_router, tags=["websocket"])
 
 
 if __name__ == "__main__":
