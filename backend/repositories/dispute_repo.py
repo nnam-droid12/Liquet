@@ -51,6 +51,15 @@ class DisputeRepository:
             return None
         return self._row_to_model(row)
 
+    async def get_by_order_id(self, order_id: str) -> Optional[Dispute]:
+        result = await self.session.execute(
+            select(DisputeRow).where(DisputeRow.order_id == order_id)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return self._row_to_model(row)
+
     async def list_all(self, status: Optional[str] = None) -> list[Dispute]:
         q = select(DisputeRow)
         if status:
