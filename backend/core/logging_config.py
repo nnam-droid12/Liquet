@@ -14,11 +14,16 @@ from config import settings
 def configure_logging() -> None:
     log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
 
+    logging.basicConfig(
+        level=log_level,
+        handlers=[RichHandler(rich_tracebacks=True, markup=True, show_path=False)],
+        format="%(message)s",
+    )
+
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
             structlog.stdlib.add_log_level,
-            structlog.stdlib.add_logger_name,
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.StackInfoRenderer(),
@@ -27,11 +32,5 @@ def configure_logging() -> None:
         ],
         wrapper_class=structlog.make_filtering_bound_logger(log_level),
         context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
-    )
-
-    logging.basicConfig(
-        level=log_level,
-        handlers=[RichHandler(rich_tracebacks=True, markup=True)],
-        format="%(message)s",
+        logger_factory=structlog.stdlib.LoggerFactory(),
     )
