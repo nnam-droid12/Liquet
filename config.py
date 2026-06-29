@@ -2,72 +2,68 @@
 
 from __future__ import annotations
 
-import os
 from functools import lru_cache
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        protected_namespaces=("settings_",),
+    )
+
     # ── QwenCloud ──────────────────────────────────────────────────────────────
-    qwen_api_key: str = Field(..., env="QWEN_API_KEY")
+    qwen_api_key: str = "sk-placeholder"
     qwen_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 
     # Two-model design: perception vs. judgment
-    model_reasoning: str = "qwen-plus"   # qwen3.7-max when available in intl API
-    model_vision: str = "qwen-vl-plus"   # qwen3.6-plus (vision-language)
-    cheap_mode: bool = Field(default=False, env="CHEAP_MODE")
+    model_reasoning: str = "qwen-plus"
+    model_vision: str = "qwen-vl-plus"
+    cheap_mode: bool = False
 
     @property
     def active_reasoning_model(self) -> str:
         return self.model_vision if self.cheap_mode else self.model_reasoning
 
     # ── Alibaba Cloud ──────────────────────────────────────────────────────────
-    alibaba_access_key_id: str = Field(default="", env="ALIBABA_CLOUD_ACCESS_KEY_ID")
-    alibaba_access_key_secret: str = Field(default="", env="ALIBABA_CLOUD_ACCESS_KEY_SECRET")
-    oss_bucket_name: str = Field(default="liquet-evidence", env="OSS_BUCKET_NAME")
-    oss_endpoint: str = Field(default="oss-us-east-1.aliyuncs.com", env="OSS_ENDPOINT")
-    oss_region: str = Field(default="us-east-1", env="OSS_REGION")
+    alibaba_cloud_access_key_id: str = ""
+    alibaba_cloud_access_key_secret: str = ""
+    oss_bucket_name: str = "liquet-evidence"
+    oss_endpoint: str = "oss-us-east-1.aliyuncs.com"
+    oss_region: str = "us-east-1"
 
     # ── Database ───────────────────────────────────────────────────────────────
-    database_url: str = Field(
-        default="sqlite+aiosqlite:///./liquet.db", env="DATABASE_URL"
-    )
+    database_url: str = "sqlite+aiosqlite:///./liquet.db"
 
     # ── App ────────────────────────────────────────────────────────────────────
-    app_env: str = Field(default="development", env="APP_ENV")
-    log_level: str = Field(default="INFO", env="LOG_LEVEL")
-    secret_key: str = Field(default="dev-secret-change-me", env="SECRET_KEY")
+    app_env: str = "development"
+    log_level: str = "INFO"
+    secret_key: str = "dev-secret-change-me"
 
     # ── Liquet gate thresholds ─────────────────────────────────────────────────
-    conf_threshold: float = Field(default=0.80, env="CONF_THRESHOLD")
-    value_threshold: float = Field(default=500.00, env="VALUE_THRESHOLD")
+    conf_threshold: float = 0.80
+    value_threshold: float = 500.00
 
     # ── MCP server ports ──────────────────────────────────────────────────────
-    order_service_port: int = Field(default=8001, env="ORDER_SERVICE_PORT")
-    logistics_service_port: int = Field(default=8002, env="LOGISTICS_SERVICE_PORT")
-    listing_service_port: int = Field(default=8003, env="LISTING_SERVICE_PORT")
-    comms_service_port: int = Field(default=8004, env="COMMS_SERVICE_PORT")
-    vision_intake_port: int = Field(default=8005, env="VISION_INTAKE_PORT")
-    policy_engine_port: int = Field(default=8006, env="POLICY_ENGINE_PORT")
-    resolution_service_port: int = Field(default=8007, env="RESOLUTION_SERVICE_PORT")
+    order_service_port: int = 8001
+    logistics_service_port: int = 8002
+    listing_service_port: int = 8003
+    comms_service_port: int = 8004
+    vision_intake_port: int = 8005
+    policy_engine_port: int = 8006
+    resolution_service_port: int = 8007
 
     # ── Paths ──────────────────────────────────────────────────────────────────
     root_dir: Path = Path(__file__).parent
     data_dir: Path = Path(__file__).parent / "data"
     cases_dir: Path = Path(__file__).parent / "data" / "cases"
-
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-        "extra": "ignore",
-        "protected_namespaces": ("settings_",),
-    }
 
 
 @lru_cache(maxsize=1)
@@ -75,5 +71,4 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# Convenience alias
 settings = get_settings()

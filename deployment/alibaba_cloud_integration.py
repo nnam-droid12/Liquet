@@ -43,8 +43,8 @@ class OSSEvidenceStore:
         bucket_name: Optional[str] = None,
         endpoint: Optional[str] = None,
     ):
-        self.access_key_id = access_key_id or os.environ["ALIBABA_CLOUD_ACCESS_KEY_ID"]
-        self.access_key_secret = access_key_secret or os.environ["ALIBABA_CLOUD_ACCESS_KEY_SECRET"]
+        self.access_key_id = access_key_id or os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_ID", "")
+        self.access_key_secret = access_key_secret or os.environ.get("ALIBABA_CLOUD_ACCESS_KEY_SECRET", "")
         self.bucket_name = bucket_name or os.environ.get("OSS_BUCKET_NAME", "liquet-evidence")
         self.endpoint = endpoint or os.environ.get("OSS_ENDPOINT", "oss-us-east-1.aliyuncs.com")
         self._bucket = None

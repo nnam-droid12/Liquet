@@ -139,7 +139,8 @@ class DisputeOrchestrator:
             missing_gaps.append(f"Tracking record not found for {dispute.order_id}")
             logger.warning("tracking_missing", order_id=dispute.order_id)
 
-        # Listing
+        # Listing — fetched once, reused below
+        listing_data: dict = {}
         if product_id:
             listing_data = await self.tools.get_listing(product_id)
             if "error" not in listing_data:
@@ -160,9 +161,9 @@ class DisputeOrchestrator:
                 content=messages,
             ))
 
-        # Evidence images from metadata
+        # Evidence images from metadata — use listing_data already fetched above
         image_urls: list[str] = dispute.metadata.get("evidence_images", [])
-        listing_desc = listing_data.get("description", "") if product_id and "error" not in await self.tools.get_listing(product_id) else ""
+        listing_desc = listing_data.get("description", "")
         for i, url in enumerate(image_urls):
             vision_result = await self.tools.analyze_image(url, listing_desc)
             ev_type = EvidenceType.PHOTO

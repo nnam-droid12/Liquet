@@ -1,0 +1,30 @@
+[
+  {
+    "id": "5a6eb564",
+    "action": "deny",
+    "dispute_id": "TEST-D001",
+    "order_id": "ORD-001",
+    "amount": null,
+    "details": {
+      "buyer_id": "USR-B001",
+      "denial_reason": "Insufficient evidence",
+      "appeal_window_days": 7
+    },
+    "executed_at": "2026-06-29T20:24:49.204259",
+    "status": "executed"
+  },
+  {
+    "id": "df2fc699",
+    "action": "deny",
+    "dispute_id": "TEST-D001",
+    "order_id": "ORD-001",
+    "amount": null,
+    "details": {
+      "buyer_id": "USR-B001",
+      "denial_reason": "Insufficient evidence",
+      "appeal_window_days": 7
+    },
+    "executed_at": "2026-06-29T20:26:52.779023",
+    "status": "executed"
+  }
+]
