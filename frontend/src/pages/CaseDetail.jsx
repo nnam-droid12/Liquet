@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 
 function ConfidenceBar({ value }) {
@@ -7,7 +7,7 @@ function ConfidenceBar({ value }) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1 bg-gray-200 rounded-full h-2">
-        <div className={`h-2 rounded-full ${color}`} style={{ width: `${pct}%` }} />
+        <div className={`h-2 rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
       </div>
       <span className="text-sm font-bold text-gray-700">{pct}%</span>
     </div>
@@ -52,6 +52,16 @@ function EvidenceCard({ ev }) {
   )
 }
 
+function LiveIndicator({ active }) {
+  if (!active) return null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-blue-600 font-medium animate-pulse">
+      <span className="w-2 h-2 rounded-full bg-blue-500 inline-block animate-ping" />
+      Agent running…
+    </span>
+  )
+}
+
 export default function CaseDetail() {
   const { disputeId } = useParams()
   const [dispute, setDispute] = useState(null)
@@ -60,9 +70,12 @@ export default function CaseDetail() {
   const [audit, setAudit] = useState([])
   const [loading, setLoading] = useState(true)
   const [investigating, setInvestigating] = useState(false)
+  const pollingRef = useRef(null)
+  const auditEndRef = useRef(null)
 
-  const load = async () => {
-    setLoading(true)
+  // Fetch everything — returns true if investigation is still in progress
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const [d, c, dec, a] = await Promise.allSettled([
         fetch(`/api/disputes/${disputeId}`).then(r => r.json()),
@@ -74,18 +87,51 @@ export default function CaseDetail() {
       if (c.status === 'fulfilled') setCaseFile(c.value)
       if (dec.status === 'fulfilled') setDecision(dec.value)
       if (a.status === 'fulfilled') setAudit(a.value || [])
+
+      const stillInvestigating =
+        d.status === 'fulfilled' && d.value?.status === 'investigating' &&
+        dec.status === 'fulfilled' && !dec.value
+      return stillInvestigating
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
-  useEffect(() => { load() }, [disputeId])
+  // Poll every 2.5 s while agent is active; stop once decision lands
+  const startPolling = () => {
+    if (pollingRef.current) return
+    pollingRef.current = setInterval(async () => {
+      const stillRunning = await load(true)
+      if (!stillRunning) stopPolling()
+      // Scroll new audit entries into view
+      auditEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 2500)
+  }
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current)
+      pollingRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    load().then(stillRunning => {
+      if (stillRunning) { setInvestigating(true); startPolling() }
+    })
+    return stopPolling
+  }, [disputeId])
 
   const handleInvestigate = async () => {
     setInvestigating(true)
-    await fetch(`/api/disputes/${disputeId}/investigate`, { method: 'POST' })
-    await load()
-    setInvestigating(false)
+    startPolling()
+    try {
+      await fetch(`/api/disputes/${disputeId}/investigate`, { method: 'POST' })
+    } finally {
+      stopPolling()
+      await load()
+      setInvestigating(false)
+    }
   }
 
   if (loading) return <div className="text-gray-500 text-center py-12">Loading case…</div>
@@ -105,17 +151,19 @@ export default function CaseDetail() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{dispute.order_id}</h1>
-            <p className="text-gray-500 text-sm mt-0.5 capitalize">{dispute.dispute_type.replace(/_/g, ' ')} · {dispute.status}</p>
+            <p className="text-gray-500 text-sm mt-0.5 capitalize">
+              {dispute.dispute_type.replace(/_/g, ' ')} · {dispute.status}
+            </p>
           </div>
           <div className="flex flex-col items-end gap-2">
+            <LiveIndicator active={investigating} />
             {decision && <GateBadge gate={decision.gate_result} />}
-            {!decision && dispute.status === 'open' && (
+            {!decision && !investigating && dispute.status === 'open' && (
               <button
                 onClick={handleInvestigate}
-                disabled={investigating}
-                className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800 disabled:opacity-50"
+                className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800"
               >
-                {investigating ? 'Investigating…' : '⚡ Run Autopilot'}
+                ⚡ Run Autopilot
               </button>
             )}
           </div>
@@ -129,7 +177,9 @@ export default function CaseDetail() {
           </div>
           <div className="bg-orange-50 rounded-lg p-4">
             <div className="text-xs font-bold text-orange-700 uppercase mb-2">Seller's Account</div>
-            <p className="text-sm text-gray-700">{dispute.seller_narrative || <em className="text-gray-400">No response yet</em>}</p>
+            <p className="text-sm text-gray-700">
+              {dispute.seller_narrative || <em className="text-gray-400">No response yet</em>}
+            </p>
           </div>
         </div>
       </div>
@@ -193,30 +243,44 @@ export default function CaseDetail() {
         </div>
       )}
 
-      {/* Audit trail */}
-      {audit.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="font-bold text-gray-900 mb-4">Audit Trail</h2>
+      {/* Audit trail — live-updating while agent runs */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-gray-900">
+            Audit Trail {audit.length > 0 && <span className="text-gray-400 font-normal text-sm">({audit.length} events)</span>}
+          </h2>
+          <LiveIndicator active={investigating} />
+        </div>
+        {audit.length === 0 && !investigating && (
+          <p className="text-gray-400 text-sm">No audit events yet. Run the autopilot to see agent steps here.</p>
+        )}
+        {investigating && audit.length === 0 && (
           <div className="space-y-2">
-            {audit.map(e => (
-              <div key={e.id} className="flex gap-3 text-sm">
-                <span className="text-gray-400 text-xs font-mono w-28 shrink-0 pt-0.5">
-                  {new Date(e.timestamp).toLocaleTimeString()}
-                </span>
-                <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 h-fit ${
-                  e.actor === 'agent' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                }`}>{e.actor}</span>
-                <div>
-                  <span className="font-medium text-gray-800">{e.event}</span>
-                  {Object.keys(e.data || {}).length > 0 && (
-                    <div className="text-gray-500 text-xs mt-0.5">{JSON.stringify(e.data)}</div>
-                  )}
-                </div>
-              </div>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-5 bg-gray-100 rounded animate-pulse w-3/4" />
             ))}
           </div>
+        )}
+        <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+          {audit.map(e => (
+            <div key={e.id} className="flex gap-3 text-sm">
+              <span className="text-gray-400 text-xs font-mono w-28 shrink-0 pt-0.5">
+                {new Date(e.timestamp).toLocaleTimeString()}
+              </span>
+              <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 h-fit ${
+                e.actor === 'agent' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+              }`}>{e.actor}</span>
+              <div>
+                <span className="font-medium text-gray-800">{e.event}</span>
+                {Object.keys(e.data || {}).length > 0 && (
+                  <div className="text-gray-500 text-xs mt-0.5">{JSON.stringify(e.data)}</div>
+                )}
+              </div>
+            </div>
+          ))}
+          <div ref={auditEndRef} />
         </div>
-      )}
+      </div>
     </div>
   )
 }
