@@ -42,5 +42,5 @@ logs/
 # Local data (do not commit real evidence)
 data/evidence/
 
-# Eval outputs (generated)
-docs/eval_results.md
+# Docs (local only — not published to repo)
+docs/
