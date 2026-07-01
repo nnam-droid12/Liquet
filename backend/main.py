@@ -23,6 +23,7 @@ from backend.api.health import router as health_router
 from backend.api.ws import router as ws_router
 from backend.api.stats import router as stats_router
 from backend.api.seller_risk import router as seller_risk_router
+from backend.api.export import router as export_router
 from backend.repositories.database import init_db
 from config import settings
 
@@ -81,6 +82,7 @@ app.include_router(queue_router, prefix="/api/queue", tags=["queue"])
 app.include_router(ws_router, tags=["websocket"])
 app.include_router(stats_router, tags=["stats"])
 app.include_router(seller_risk_router, tags=["analytics"])
+app.include_router(export_router, tags=["export"])
 
 
 if __name__ == "__main__":
