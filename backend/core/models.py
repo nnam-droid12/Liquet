@@ -45,6 +45,7 @@ class DisputeStatus(str, Enum):
     RESOLVED = "resolved"
     ESCALATED = "escalated"
     CLOSED = "closed"
+    FAILED = "failed"
 
 
 class EvidenceType(str, Enum):

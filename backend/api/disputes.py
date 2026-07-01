@@ -63,7 +63,12 @@ async def investigate_dispute(
         raise HTTPException(status_code=409, detail=f"Dispute already in status: {dispute.status}")
 
     orchestrator = DisputeOrchestrator(session)
-    decision = await orchestrator.run(dispute)
+    try:
+        decision = await orchestrator.run(dispute)
+    except Exception as exc:
+        logger.error("investigation_failed", dispute_id=dispute_id, error=str(exc))
+        await repo.update_status(dispute_id, DisputeStatus.FAILED)
+        raise HTTPException(status_code=500, detail=f"Investigation failed: {exc}") from exc
     return {
         "dispute_id": dispute_id,
         "gate_result": decision.gate_result.value,

@@ -88,9 +88,8 @@ export default function CaseDetail() {
       if (dec.status === 'fulfilled') setDecision(dec.value)
       if (a.status === 'fulfilled') setAudit(a.value || [])
 
-      const stillInvestigating =
-        d.status === 'fulfilled' && d.value?.status === 'investigating' &&
-        dec.status === 'fulfilled' && !dec.value
+      const status = d.status === 'fulfilled' ? d.value?.status : null
+      const stillInvestigating = status === 'investigating' && dec.status === 'fulfilled' && !dec.value
       return stillInvestigating
     } finally {
       if (!silent) setLoading(false)
@@ -126,7 +125,7 @@ export default function CaseDetail() {
     setInvestigating(true)
     // Try WebSocket streaming; fall back to REST polling
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-    const wsUrl = `${proto}://localhost:8080/ws/disputes/${disputeId}/stream`
+    const wsUrl = `${proto}://${window.location.host}/ws/disputes/${disputeId}/stream`
     let ws
     try {
       ws = new WebSocket(wsUrl)
@@ -182,13 +181,18 @@ export default function CaseDetail() {
           <div className="flex flex-col items-end gap-2">
             <LiveIndicator active={investigating} />
             {decision && <GateBadge gate={decision.gate_result} />}
-            {!decision && !investigating && dispute.status === 'open' && (
+            {!decision && !investigating && (dispute.status === 'open' || dispute.status === 'failed') && (
               <button
                 onClick={handleInvestigate}
                 className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800"
               >
-                ⚡ Run Autopilot
+                {dispute.status === 'failed' ? '↺ Retry Autopilot' : '⚡ Run Autopilot'}
               </button>
+            )}
+            {dispute.status === 'failed' && !investigating && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-100 text-red-700 border border-red-300 text-sm font-medium">
+                ✕ Investigation failed — retry above
+              </span>
             )}
           </div>
         </div>
