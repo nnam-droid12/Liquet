@@ -5,7 +5,6 @@ All actions are reversible/auditable and recorded in a mock ledger.
 In production this would call payment processors, warehouse systems, etc.
 """
 
-from __future__ import annotations
 
 import json
 import uuid

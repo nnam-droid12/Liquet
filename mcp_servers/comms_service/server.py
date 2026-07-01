@@ -1,6 +1,5 @@
 ﻿"""Comms Service MCP server â€” buyer-seller message history."""
 
-from __future__ import annotations
 
 import json
 from pathlib import Path

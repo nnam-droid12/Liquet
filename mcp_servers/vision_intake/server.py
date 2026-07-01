@@ -6,7 +6,6 @@ Perception is cleanly separated from judgment:
 - The reasoning core (qwen3.7-max / orchestrator) interprets observations against claims.
 """
 
-from __future__ import annotations
 
 import asyncio
 from typing import Any, Optional

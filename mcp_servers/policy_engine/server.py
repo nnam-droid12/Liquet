@@ -5,7 +5,6 @@ Hybrid: rule checks first, then LLM reasoning over policy.md for edge cases.
 Returns eligible resolutions + the controlling policy clauses.
 """
 
-from __future__ import annotations
 
 import asyncio
 from pathlib import Path

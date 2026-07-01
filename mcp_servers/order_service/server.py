@@ -1,6 +1,5 @@
 ﻿"""Order Service MCP server â€” returns order records and line items."""
 
-from __future__ import annotations
 
 import json
 from pathlib import Path

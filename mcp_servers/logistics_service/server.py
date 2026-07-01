@@ -1,6 +1,5 @@
 ﻿"""Logistics Service MCP server â€” tracking history and carrier scan events."""
 
-from __future__ import annotations
 
 import json
 from pathlib import Path
