@@ -6,6 +6,7 @@ import CaseDetail from './pages/CaseDetail.jsx'
 import NonLiquetQueue from './pages/NonLiquetQueue.jsx'
 import NewDispute from './pages/NewDispute.jsx'
 import SellerRisk from './pages/SellerRisk.jsx'
+import PolicyBrowser from './pages/PolicyBrowser.jsx'
 
 function NavItem({ to, children }) {
   return (
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="/cases/:disputeId" element={<CaseDetail />} />
         <Route path="/queue" element={<NonLiquetQueue />} />
         <Route path="/seller-risk" element={<SellerRisk />} />
+        <Route path="/policy" element={<PolicyBrowser />} />
         <Route path="/new" element={<NewDispute />} />
       </Routes>
     </AppShell>
