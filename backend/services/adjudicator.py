@@ -77,26 +77,29 @@ Respond with JSON:
 
 
 class AdjudicationPipeline:
+    _cached_policy_text: str = ""
+
     async def adjudicate(self, case_file: CaseFile) -> Verdict:
+        claims = await self._extract_claims(case_file)
+        return await self.adjudicate_with_claims(case_file, claims)
+
+    async def adjudicate_with_claims(
+        self, case_file: CaseFile, claims: ClaimExtraction
+    ) -> Verdict:
+        """Run adjudication with pre-extracted claims (skips claim-extraction LLM call)."""
         log = logger.bind(dispute_id=case_file.dispute_id)
 
-        # Step 1: Extract claims
-        claims = await self._extract_claims(case_file)
-        log.info("claims_extracted",
-                 buyer_claims=len(claims.buyer_claims),
-                 seller_claims=len(claims.seller_claims))
-
-        # Step 2: Build evidence summary for LLM
         evidence_summary = self._format_evidence(case_file)
 
-        # Step 3: Get policy text
-        try:
-            from backend.services.tool_client import ToolClient
-            policy_text = await ToolClient().get_policy_text()
-        except Exception:
-            policy_text = "Standard buyer protection policy applies."
+        if not AdjudicationPipeline._cached_policy_text:
+            try:
+                from backend.services.tool_client import ToolClient
+                AdjudicationPipeline._cached_policy_text = await ToolClient().get_policy_text()
+            except Exception:
+                AdjudicationPipeline._cached_policy_text = "Standard buyer protection policy applies."
 
-        # Step 4: Run adjudication
+        policy_text = AdjudicationPipeline._cached_policy_text
+
         verdict_output = await self._run_adjudication(
             case_file, claims, evidence_summary, policy_text
         )
@@ -104,7 +107,6 @@ class AdjudicationPipeline:
                  resolution=verdict_output.resolution,
                  confidence=verdict_output.confidence)
 
-        # Step 5: Build Verdict with citations
         citations = []
         for eid in verdict_output.citation_evidence_ids:
             ev = case_file.evidence_by_id(eid)
@@ -115,11 +117,9 @@ class AdjudicationPipeline:
                     supports=verdict_output.rationale[:100],
                 ))
 
-        # Map hard contradictions back to case_file
         if verdict_output.hard_contradictions:
             case_file.hard_contradictions.extend(verdict_output.hard_contradictions)
 
-        # Resolve resolution enum safely
         try:
             resolution = ResolutionType(verdict_output.resolution)
         except ValueError:
