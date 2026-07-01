@@ -65,7 +65,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState('')
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
+  const refresh = React.useCallback(() => {
     Promise.all([
       fetch('/api/disputes/').then(r => r.json()),
       fetch('/api/stats').then(r => r.ok ? r.json() : null).catch(() => null),
@@ -75,6 +75,12 @@ export default function Dashboard() {
       setLoading(false)
     }).catch(e => { setError(e.message); setLoading(false) })
   }, [])
+
+  useEffect(() => {
+    refresh()
+    const id = setInterval(refresh, 15000)
+    return () => clearInterval(id)
+  }, [refresh])
 
   const filtered = disputes
     .filter(d => !filter || d.status === filter)
@@ -122,10 +128,34 @@ export default function Dashboard() {
         <StatCard label="Avg Confidence" value={avgConf ? `${avgConf}%` : '—'} accent="purple" />
       </div>
 
-      {/* Auto-resolution rate */}
+      {/* Auto-resolution rate + type breakdown */}
       {(localStats.resolved + localStats.escalated) > 0 && (
-        <div className="mb-6">
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
           <AutoResolutionBar rate={autoRate} />
+          {platformStats?.dispute_type_breakdown && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div className="text-sm font-medium text-gray-600 mb-3">Dispute Type Breakdown</div>
+              <div className="space-y-2">
+                {Object.entries(platformStats.dispute_type_breakdown)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([type, count]) => {
+                    const total = Object.values(platformStats.dispute_type_breakdown).reduce((a, b) => a + b, 0)
+                    const pct = Math.round(count / total * 100)
+                    return (
+                      <div key={type}>
+                        <div className="flex justify-between text-xs text-gray-500 mb-0.5">
+                          <span className="capitalize">{type.replace(/_/g, ' ')}</span>
+                          <span className="font-medium">{count} ({pct}%)</span>
+                        </div>
+                        <div className="bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
