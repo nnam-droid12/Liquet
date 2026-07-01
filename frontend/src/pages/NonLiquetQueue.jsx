@@ -45,6 +45,25 @@ function ReviewCard({ brief, onResolve }) {
         </div>
       </div>
 
+      {/* Evidence summary */}
+      {brief.evidence_summary?.length > 0 && (
+        <details className="mb-4">
+          <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700 font-medium">
+            View {brief.evidence_summary.length} evidence items
+          </summary>
+          <div className="mt-2 space-y-1">
+            {brief.evidence_summary.map(ev => (
+              <div key={ev.id} className="text-xs bg-gray-50 border border-gray-100 rounded p-2">
+                <span className="font-mono text-gray-400">[{ev.id}]</span>{' '}
+                <span className="font-medium text-gray-600">{ev.source}</span>{' '}
+                <span className="text-gray-400">·  rel {Math.round(ev.reliability * 100)}%</span>{' '}
+                <span className="text-gray-500">{ev.summary}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
       {/* Agent's leaning */}
       <div className="bg-gray-50 rounded-lg p-3 mb-4 flex items-center gap-3">
         <div className="text-sm text-gray-600">
