@@ -50,15 +50,44 @@ export default function NewDispute() {
     }
   }
 
-  const loadDemo = () => {
-    setForm({
-      order_id: 'ORD-004',
-      dispute_type: 'not_as_described',
-      buyer_id: 'USR-B004',
-      seller_id: 'USR-S001',
-      buyer_narrative: 'I recorded my unboxing on video. The moment I removed the lens from the box it was visibly scratched on the front element. The scratch was there before I touched it. $649 for a damaged lens — I need a full refund.',
-      seller_narrative: 'I have detailed inspection photos taken on the day of shipping. The glass was perfect. I\'ve been selling cameras for 8 years with zero complaints. The buyer must have caused the damage after unboxing.',
-    })
+  const SCENARIOS = [
+    {
+      label: 'Clear LIQUET (never arrived)',
+      form: {
+        order_id: `ORD-D${Date.now().toString().slice(-4)}`,
+        dispute_type: 'never_arrived',
+        buyer_id: 'USR-B010',
+        seller_id: 'USR-S010',
+        buyer_narrative: 'My order was supposed to arrive 3 weeks ago. Tracking shows it got stuck at the sorting facility and was never delivered to me. I have waited patiently and the package has been marked lost by the carrier.',
+        seller_narrative: 'I shipped the item on the date stated. The carrier lost it in transit — this is not my fault. I have the shipping receipt.',
+      }
+    },
+    {
+      label: '50/50 (hard contradiction)',
+      form: {
+        order_id: `ORD-D${Date.now().toString().slice(-4)}`,
+        dispute_type: 'not_as_described',
+        buyer_id: 'USR-B011',
+        seller_id: 'USR-S001',
+        buyer_narrative: 'I recorded my unboxing on video. The moment I removed the lens from the box it was visibly scratched on the front element. The scratch was there before I touched it. $649 for a damaged lens — I need a full refund.',
+        seller_narrative: 'I have detailed inspection photos taken on the day of shipping. The glass was perfect. I\'ve been selling cameras for 8 years with zero complaints. The buyer must have caused the damage after unboxing.',
+      }
+    },
+    {
+      label: 'Clear NON LIQUET (high value)',
+      form: {
+        order_id: `ORD-D${Date.now().toString().slice(-4)}`,
+        dispute_type: 'counterfeit',
+        buyer_id: 'USR-B012',
+        seller_id: 'USR-S002',
+        buyer_narrative: 'I purchased what was advertised as an authentic Rolex watch for $2,500. The watch has several signs of being counterfeit: the logo is slightly off-center, the weight feels wrong, and the serial number does not verify on the Rolex website.',
+        seller_narrative: 'The watch is completely authentic. I purchased it from an authorized dealer and have the original receipt and certificate of authenticity.',
+      }
+    },
+  ]
+
+  const loadDemo = (scenarioIdx = 1) => {
+    setForm(SCENARIOS[scenarioIdx].form)
   }
 
   return (
@@ -68,9 +97,18 @@ export default function NewDispute() {
           <h1 className="text-2xl font-bold text-gray-900">New Dispute</h1>
           <p className="text-gray-500 text-sm mt-1">Submit a marketplace dispute for Liquet to investigate</p>
         </div>
-        <button onClick={loadDemo} className="text-sm text-blue-600 hover:text-blue-800 underline">
-          Load demo (50/50 case)
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          {SCENARIOS.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => loadDemo(i)}
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded border border-gray-300 transition-colors"
+            >
+              Demo: {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
