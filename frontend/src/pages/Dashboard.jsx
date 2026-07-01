@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 
 const STATUS_COLOR = {
   open: 'bg-yellow-100 text-yellow-800',
-  investigating: 'bg-blue-100 text-blue-800',
+  investigating: 'bg-blue-100 text-blue-800 animate-pulse',
   resolved: 'bg-green-100 text-green-800',
   escalated: 'bg-red-100 text-red-800',
   closed: 'bg-gray-100 text-gray-600',
+  failed: 'bg-red-200 text-red-900',
 }
 
 const GATE_BADGE = {
@@ -14,72 +15,144 @@ const GATE_BADGE = {
   NON_LIQUET: 'bg-amber-100 text-amber-700 border border-amber-300',
 }
 
+function StatCard({ label, value, sub, accent }) {
+  const colors = {
+    gray: 'text-gray-700',
+    yellow: 'text-yellow-700',
+    green: 'text-green-700',
+    red: 'text-red-700',
+    blue: 'text-blue-700',
+    purple: 'text-purple-700',
+  }
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className={`text-3xl font-bold ${colors[accent] || 'text-gray-700'}`}>{value}</div>
+      <div className="text-gray-500 text-sm mt-0.5">{label}</div>
+      {sub && <div className="text-xs text-gray-400 mt-1">{sub}</div>}
+    </div>
+  )
+}
+
+function AutoResolutionBar({ rate }) {
+  const pct = Math.round(rate * 100)
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div className="flex items-end justify-between mb-2">
+        <div>
+          <div className="text-3xl font-bold text-emerald-600">{pct}%</div>
+          <div className="text-gray-500 text-sm">Auto-Resolution Rate</div>
+        </div>
+        <div className="text-xs text-gray-400 text-right">
+          <div>LIQUET decisions</div>
+          <div>without human review</div>
+        </div>
+      </div>
+      <div className="bg-gray-100 rounded-full h-2">
+        <div
+          className="bg-emerald-500 h-2 rounded-full transition-all duration-700"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [disputes, setDisputes] = useState([])
+  const [platformStats, setPlatformStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [filter, setFilter] = useState('')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
-    fetch('/api/disputes/')
-      .then(r => r.json())
-      .then(data => { setDisputes(data); setLoading(false) })
-      .catch(e => { setError(e.message); setLoading(false) })
+    Promise.all([
+      fetch('/api/disputes/').then(r => r.json()),
+      fetch('/api/stats').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([disputeData, statsData]) => {
+      setDisputes(disputeData)
+      setPlatformStats(statsData)
+      setLoading(false)
+    }).catch(e => { setError(e.message); setLoading(false) })
   }, [])
 
-  const filtered = filter
-    ? disputes.filter(d => d.status === filter)
-    : disputes
+  const filtered = disputes
+    .filter(d => !filter || d.status === filter)
+    .filter(d => !search || d.order_id.toLowerCase().includes(search.toLowerCase()) ||
+      d.id.toLowerCase().includes(search.toLowerCase()) ||
+      d.dispute_type.includes(search.toLowerCase()))
 
-  const stats = {
+  const localStats = {
     total: disputes.length,
     open: disputes.filter(d => d.status === 'open').length,
     resolved: disputes.filter(d => d.status === 'resolved').length,
     escalated: disputes.filter(d => d.status === 'escalated').length,
+    investigating: disputes.filter(d => d.status === 'investigating').length,
   }
+
+  const autoRate = platformStats?.auto_resolution_rate || (
+    localStats.resolved / Math.max(localStats.resolved + localStats.escalated, 1)
+  )
+  const avgConf = platformStats ? Math.round(platformStats.avg_confidence * 100) : 0
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dispute Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-1">All marketplace disputes — LIQUET resolves autonomously, NON LIQUET awaits human review</p>
+          <p className="text-gray-500 text-sm mt-1">
+            LIQUET resolves autonomously · NON LIQUET escalates to human review
+          </p>
         </div>
-        <Link to="/new" className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition-colors">
+        <Link
+          to="/new"
+          className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition-colors"
+        >
           + New Dispute
         </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Total', value: stats.total, color: 'text-gray-700' },
-          { label: 'Open', value: stats.open, color: 'text-yellow-700' },
-          { label: 'Resolved', value: stats.resolved, color: 'text-green-700' },
-          { label: 'Escalated', value: stats.escalated, color: 'text-red-700' },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-gray-500 text-sm">{s.label}</div>
-          </div>
-        ))}
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <StatCard label="Total" value={localStats.total} accent="gray" />
+        <StatCard label="Open" value={localStats.open} accent="yellow" />
+        <StatCard label="Investigating" value={localStats.investigating} accent="blue" />
+        <StatCard label="Resolved" value={localStats.resolved} accent="green" sub="LIQUET" />
+        <StatCard label="Escalated" value={localStats.escalated} accent="red" sub="NON LIQUET" />
+        <StatCard label="Avg Confidence" value={avgConf ? `${avgConf}%` : '—'} accent="purple" />
       </div>
 
-      {/* Filter */}
-      <div className="flex gap-2 mb-4">
-        {['', 'open', 'investigating', 'resolved', 'escalated'].map(s => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === s
-                ? 'bg-blue-700 text-white border-blue-700'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            {s || 'All'}
-          </button>
-        ))}
+      {/* Auto-resolution rate */}
+      {(localStats.resolved + localStats.escalated) > 0 && (
+        <div className="mb-6">
+          <AutoResolutionBar rate={autoRate} />
+        </div>
+      )}
+
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search by order ID or dispute type…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div className="flex gap-2 flex-wrap">
+          {['', 'open', 'investigating', 'resolved', 'escalated'].map(s => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+                filter === s
+                  ? 'bg-blue-700 text-white border-blue-700'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {s || 'All'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
@@ -100,9 +173,9 @@ export default function Dashboard() {
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Order</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Type</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-700">Verdict</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-700">Gate</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-700">Created</th>
-                <th className="px-4 py-3"></th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -110,7 +183,7 @@ export default function Dashboard() {
                 <tr key={d.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{d.id.slice(0, 8)}</td>
                   <td className="px-4 py-3 font-medium">{d.order_id}</td>
-                  <td className="px-4 py-3 text-gray-600">{d.dispute_type.replace(/_/g, ' ')}</td>
+                  <td className="px-4 py-3 text-gray-600 capitalize">{d.dispute_type.replace(/_/g, ' ')}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[d.status] || 'bg-gray-100 text-gray-600'}`}>
                       {d.status}
