@@ -23,14 +23,17 @@ from backend.core.models import (
     Actor, AuditEntry, CaseFile, Claim, Decision, Dispute,
     DisputeStatus, DisputeType, EvidenceItem, EvidenceType,
     GateResult, HumanReviewBrief, Party, ResolutionType, Verdict,
-    EvidenceCitation, VerdictOutput, ClaimExtraction,
+    EvidenceCitation, VerdictOutput, ClaimExtraction, GhostCaseResult,
 )
 from backend.repositories.dispute_repo import (
     AuditRepository, CaseFileRepository, DecisionRepository,
     DisputeRepository, HumanQueueRepository,
 )
 from backend.services.adjudicator import AdjudicationPipeline
+from backend.services.ghost_cases import GhostCaseEngine
 from backend.services.liquet_gate import LiquetGate
+from backend.services.skeptic import SkepticEngine
+from backend.services.stability import StabilityScorer
 from backend.services.tool_client import ToolClient
 from config import settings
 
@@ -48,6 +51,9 @@ class DisputeOrchestrator:
         self.tools = ToolClient()
         self.adjudicator = AdjudicationPipeline()
         self.gate = LiquetGate()
+        self.ghost_engine = GhostCaseEngine(session)
+        self.stability_scorer = StabilityScorer(self.adjudicator)
+        self.skeptic_engine = SkepticEngine()
 
     async def run(self, dispute: Dispute) -> Decision:
         log = logger.bind(dispute_id=dispute.id, order_id=dispute.order_id)
@@ -61,25 +67,75 @@ class DisputeOrchestrator:
 
         # ── Phase 1: Gather evidence ──────────────────────────────────────────
         case_file = await self._assemble_case(dispute)
+
+        # Ghost Cases — inject synthetic evidence before adjudication
+        ghost_result = await self.ghost_engine.analyze(dispute)
+        if ghost_result.synthetic_evidence is not None:
+            case_file.evidence.append(ghost_result.synthetic_evidence)
+            await self._audit(dispute.id, "ghost_cases_injected", Actor.AGENT, {
+                "similar_cases": ghost_result.similar_cases_count,
+                "pattern_score": round(ghost_result.pattern_match_score, 3),
+                "weight": ghost_result.weight,
+            })
+            log.info("ghost_cases_injected",
+                     similar=ghost_result.similar_cases_count,
+                     pattern=ghost_result.pattern_match_score)
+
         await self.case_repo.save(case_file)
         await self._audit(dispute.id, "case_assembled", Actor.AGENT, {
             "evidence_count": len(case_file.evidence),
             "hard_contradictions": case_file.hard_contradictions,
         })
-        log.info("case_assembled", evidence_count=len(case_file.evidence))
 
-        # ── Phase 2: Adjudicate ───────────────────────────────────────────────
-        verdict = await self.adjudicator.adjudicate(case_file)
+        # ── Phase 2: Extract claims (shared across adjudication + stability) ──
+        claims = await self.adjudicator._extract_claims(case_file)
+        await self._audit(dispute.id, "claims_extracted", Actor.AGENT, {
+            "buyer_claims": len(claims.buyer_claims),
+            "seller_claims": len(claims.seller_claims),
+        })
+
+        # ── Phase 3: Verdict Stability Scoring ───────────────────────────────
+        stability_result = await self.stability_scorer.score(case_file, claims)
+        await self._audit(dispute.id, "stability_scored", Actor.AGENT, {
+            "stability_score": stability_result.stability_score,
+            "effective_confidence": stability_result.effective_confidence,
+            "is_stable": stability_result.is_stable,
+            "distribution": stability_result.verdict_distribution,
+        })
+        log.info("stability_scored",
+                 score=stability_result.stability_score,
+                 effective_conf=stability_result.effective_confidence)
+
+        # ── Phase 4: Final adjudication ───────────────────────────────────────
+        verdict = await self.adjudicator.adjudicate_with_claims(case_file, claims)
         await self._audit(dispute.id, "verdict_produced", Actor.AGENT, {
             "resolution": verdict.resolution.value,
             "confidence": verdict.confidence,
+            "effective_confidence": stability_result.effective_confidence,
             "policy_clauses": verdict.policy_clauses,
         })
-        log.info("verdict_produced", resolution=verdict.resolution.value, confidence=verdict.confidence)
+        log.info("verdict_produced",
+                 resolution=verdict.resolution.value,
+                 confidence=verdict.confidence)
 
-        # ── Phase 3: Liquet gate ──────────────────────────────────────────────
-        gate_result, abstention_reason = self.gate.evaluate(verdict, case_file)
-        log.info("gate_evaluated", result=gate_result.value, abstention=abstention_reason)
+        # ── Phase 5: Skeptic Pass ─────────────────────────────────────────────
+        skeptic_result = await self.skeptic_engine.challenge(case_file, verdict)
+        await self._audit(dispute.id, "skeptic_complete", Actor.AGENT, {
+            "rebuttal_strength": skeptic_result.rebuttal_strength,
+            "verdict_contested": skeptic_result.verdict_contested,
+            "summary": skeptic_result.contest_summary,
+        })
+        log.info("skeptic_complete",
+                 contested=skeptic_result.verdict_contested,
+                 strength=skeptic_result.rebuttal_strength)
+
+        # ── Phase 6: Liquet gate (stability + skeptic aware) ─────────────────
+        gate_result, abstention_reason = self.gate.evaluate(
+            verdict, case_file,
+            stability=stability_result,
+            skeptic=skeptic_result,
+        )
+        log.info("gate_evaluated", result=gate_result.value)
 
         decision = Decision(
             dispute_id=dispute.id,
@@ -87,6 +143,9 @@ class DisputeOrchestrator:
             gate_result=gate_result,
             abstention_reason=abstention_reason,
             actor=Actor.AGENT,
+            ghost_case_result=ghost_result,
+            stability_result=stability_result,
+            skeptic_result=skeptic_result,
         )
         await self.decision_repo.save(decision)
 
