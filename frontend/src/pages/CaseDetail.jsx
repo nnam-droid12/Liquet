@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import GhostCasesPanel from '../components/GhostCasesPanel.jsx'
+import StabilityGauge from '../components/StabilityGauge.jsx'
+import SkepticPanel from '../components/SkepticPanel.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -248,6 +251,15 @@ export default function CaseDetail() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Innovative feature panels */}
+      {decision && (
+        <>
+          <GhostCasesPanel ghostResult={decision.ghost_case_result} />
+          <StabilityGauge stabilityResult={decision.stability_result} />
+          <SkepticPanel skepticResult={decision.skeptic_result} />
+        </>
       )}
 
       {/* Evidence */}
