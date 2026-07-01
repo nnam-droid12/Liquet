@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import CaseDetail from './pages/CaseDetail.jsx'
 import NonLiquetQueue from './pages/NonLiquetQueue.jsx'
 import NewDispute from './pages/NewDispute.jsx'
+import SellerRisk from './pages/SellerRisk.jsx'
 
 function NavItem({ to, children }) {
   return (
@@ -40,6 +41,7 @@ function AppShell({ children }) {
             <div className="flex gap-2">
               <NavItem to="/dashboard">Dashboard</NavItem>
               <NavItem to="/queue">Non-Liquet Queue</NavItem>
+              <NavItem to="/seller-risk">Seller Risk</NavItem>
               <NavItem to="/new">New Dispute</NavItem>
             </div>
           </div>
@@ -76,6 +78,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/cases/:disputeId" element={<CaseDetail />} />
         <Route path="/queue" element={<NonLiquetQueue />} />
+        <Route path="/seller-risk" element={<SellerRisk />} />
         <Route path="/new" element={<NewDispute />} />
       </Routes>
     </AppShell>
