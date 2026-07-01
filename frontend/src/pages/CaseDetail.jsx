@@ -164,7 +164,7 @@ export default function CaseDetail() {
     <div>
       {/* Breadcrumb */}
       <div className="mb-4 text-sm text-gray-500">
-        <Link to="/" className="hover:text-blue-600">Dashboard</Link>
+        <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
         <span className="mx-2">›</span>
         <span className="text-gray-800 font-medium">Case {disputeId.slice(0, 8)}</span>
       </div>
