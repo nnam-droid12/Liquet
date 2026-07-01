@@ -1,4 +1,4 @@
-"""Logistics Service MCP server — tracking history and carrier scan events."""
+﻿"""Logistics Service MCP server â€” tracking history and carrier scan events."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("logistics_service")
 
 _DATA_FILE = Path(__file__).parent.parent.parent / "data" / "tracking.json"
-_tracking: dict[str, dict[str, Any]] = {}
+_tracking: dict[str, dict] = {}
 
 
 def _load_data() -> None:
@@ -84,7 +84,7 @@ def _load_data() -> None:
 
 
 @mcp.tool()
-def get_tracking(order_id: str) -> dict[str, Any]:
+def get_tracking(order_id: str) -> dict:
     """Get full tracking history and carrier scan events for an order."""
     _load_data()
     info = _tracking.get(order_id)
@@ -94,7 +94,7 @@ def get_tracking(order_id: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def was_delivered(order_id: str) -> dict[str, Any]:
+def was_delivered(order_id: str) -> dict:
     """Quick check: was this order delivered and when?"""
     _load_data()
     info = _tracking.get(order_id)

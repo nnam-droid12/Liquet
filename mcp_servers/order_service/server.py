@@ -1,4 +1,4 @@
-"""Order Service MCP server — returns order records and line items."""
+﻿"""Order Service MCP server â€” returns order records and line items."""
 
 from __future__ import annotations
 
@@ -10,9 +10,9 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("order_service")
 
-# Seed data — loaded from synthetic cases
+# Seed data â€” loaded from synthetic cases
 _DATA_FILE = Path(__file__).parent.parent.parent / "data" / "orders.json"
-_orders: dict[str, dict[str, Any]] = {}
+_orders: dict[str, dict] = {}
 
 
 def _load_data() -> None:
@@ -66,7 +66,7 @@ def _load_data() -> None:
 
 
 @mcp.tool()
-def get_order(order_id: str) -> dict[str, Any]:
+def get_order(order_id: str) -> dict:
     """Retrieve full order record including buyer/seller IDs, product, price, and status."""
     _load_data()
     order = _orders.get(order_id)
@@ -76,7 +76,7 @@ def get_order(order_id: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def list_buyer_orders(buyer_id: str) -> list[dict[str, Any]]:
+def list_buyer_orders(buyer_id: str) -> list:
     """List all orders for a given buyer."""
     _load_data()
     return [o for o in _orders.values() if o.get("buyer_id") == buyer_id]

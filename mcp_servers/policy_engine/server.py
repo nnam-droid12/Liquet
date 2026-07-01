@@ -1,5 +1,5 @@
-"""
-Policy Engine MCP server — applies platform policy to a CaseFile.
+﻿"""
+Policy Engine MCP server â€” applies platform policy to a CaseFile.
 
 Hybrid: rule checks first, then LLM reasoning over policy.md for edge cases.
 Returns eligible resolutions + the controlling policy clauses.
@@ -24,7 +24,7 @@ def _load_policy() -> str:
     return "Standard marketplace policy applies."
 
 
-def _rule_check(case_summary: dict[str, Any]) -> dict[str, Any]:
+def _rule_check(case_summary: dict) -> dict:
     """Fast deterministic rule checks before LLM reasoning."""
     eligible = []
     clauses = []
@@ -88,7 +88,7 @@ def _rule_check(case_summary: dict[str, Any]) -> dict[str, Any]:
 
 
 @mcp.tool()
-def evaluate_policy(case_summary: dict[str, Any]) -> dict[str, Any]:
+def evaluate_policy(case_summary: dict) -> dict:
     """
     Apply platform policy rules to a case summary.
     Returns eligible resolutions, controlling clauses, and any hard escalation blocks.

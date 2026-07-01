@@ -1,4 +1,4 @@
-"""Comms Service MCP server — buyer-seller message history."""
+﻿"""Comms Service MCP server â€” buyer-seller message history."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("comms_service")
 
 _DATA_FILE = Path(__file__).parent.parent.parent / "data" / "messages.json"
-_messages: dict[str, list[dict[str, Any]]] = {}
+_messages: dict[str, list] = {}
 
 
 def _load_data() -> None:
@@ -22,7 +22,7 @@ def _load_data() -> None:
         _messages = {
             "ORD-001": [
                 {"ts": "2025-11-08T18:00:00Z", "from": "buyer", "text": "I just received the jacket but the color is dark grey, not brown like in the listing photos."},
-                {"ts": "2025-11-08T20:15:00Z", "from": "seller", "text": "That's impossible — I shipped the exact item from the photos. The color is brown leather, it may look different under indoor lighting."},
+                {"ts": "2025-11-08T20:15:00Z", "from": "seller", "text": "That's impossible â€” I shipped the exact item from the photos. The color is brown leather, it may look different under indoor lighting."},
                 {"ts": "2025-11-09T09:00:00Z", "from": "buyer", "text": "I've attached photos. This is clearly grey, not brown. I want a refund."},
                 {"ts": "2025-11-09T11:30:00Z", "from": "seller", "text": "I see your photo. This is the same jacket. Lighting and camera settings make leather look different. No refund warranted."},
             ],
@@ -33,7 +33,7 @@ def _load_data() -> None:
                 {"ts": "2025-11-13T18:00:00Z", "from": "seller", "text": "I tested this item before shipping and it worked perfectly. I believe you may have damaged it."},
             ],
             "ORD-003": [
-                {"ts": "2025-11-05T12:00:00Z", "from": "buyer", "text": "The ceramic set arrived — 3 of the 6 cups are broken. The packaging wasn't adequate for fragile items."},
+                {"ts": "2025-11-05T12:00:00Z", "from": "buyer", "text": "The ceramic set arrived â€” 3 of the 6 cups are broken. The packaging wasn't adequate for fragile items."},
                 {"ts": "2025-11-05T15:00:00Z", "from": "seller", "text": "I'm so sorry! I packaged everything carefully but USPS must have damaged it in transit. I have insurance. Please file a claim and I'll help."},
                 {"ts": "2025-11-05T17:00:00Z", "from": "buyer", "text": "I've taken photos of all broken pieces and the packaging. What do we do next?"},
                 {"ts": "2025-11-06T09:00:00Z", "from": "seller", "text": "Please send the photos. I'll contact USPS and we'll get you a partial refund for the broken items."},
@@ -54,7 +54,7 @@ def _load_data() -> None:
 
 
 @mcp.tool()
-def get_messages(order_id: str) -> list[dict[str, Any]]:
+def get_messages(order_id: str) -> list:
     """Get the full buyer-seller message thread for an order."""
     _load_data()
     msgs = _messages.get(order_id)
@@ -64,7 +64,7 @@ def get_messages(order_id: str) -> list[dict[str, Any]]:
 
 
 @mcp.tool()
-def get_message_summary(order_id: str) -> dict[str, Any]:
+def get_message_summary(order_id: str) -> dict:
     """Get a structured summary of the message thread: key claims by each party."""
     _load_data()
     msgs = _messages.get(order_id, [])

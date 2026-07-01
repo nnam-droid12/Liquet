@@ -1,5 +1,5 @@
-"""
-Resolution Service MCP server — executes chosen resolution actions.
+﻿"""
+Resolution Service MCP server â€” executes chosen resolution actions.
 
 All actions are reversible/auditable and recorded in a mock ledger.
 In production this would call payment processors, warehouse systems, etc.
@@ -20,18 +20,18 @@ mcp = FastMCP("resolution_service")
 _LEDGER_PATH = Path(__file__).parent.parent.parent / "data" / "resolution_ledger.json"
 
 
-def _load_ledger() -> list[dict[str, Any]]:
+def _load_ledger() -> list:
     if _LEDGER_PATH.exists():
         return json.loads(_LEDGER_PATH.read_text())
     return []
 
 
-def _save_ledger(entries: list[dict[str, Any]]) -> None:
+def _save_ledger(entries: list) -> None:
     _LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
     _LEDGER_PATH.write_text(json.dumps(entries, indent=2, default=str))
 
 
-def _record(action: str, dispute_id: str, order_id: str, amount: Optional[float], details: dict) -> dict[str, Any]:
+def _record(action: str, dispute_id: str, order_id: str, amount: Optional[float], details: dict) -> dict:
     entry = {
         "id": str(uuid.uuid4())[:8],
         "action": action,
@@ -49,7 +49,7 @@ def _record(action: str, dispute_id: str, order_id: str, amount: Optional[float]
 
 
 @mcp.tool()
-def issue_full_refund(dispute_id: str, order_id: str, amount: float, buyer_id: str) -> dict[str, Any]:
+def issue_full_refund(dispute_id: str, order_id: str, amount: float, buyer_id: str) -> dict:
     """Issue a full refund to the buyer. Records in the audit ledger."""
     return _record("full_refund", dispute_id, order_id, amount, {
         "buyer_id": buyer_id,
@@ -63,8 +63,8 @@ def issue_full_refund(dispute_id: str, order_id: str, amount: float, buyer_id: s
 def issue_partial_refund(
     dispute_id: str, order_id: str, full_amount: float,
     refund_pct: float, buyer_id: str, reason: str
-) -> dict[str, Any]:
-    """Issue a partial refund. refund_pct is 0.0–1.0."""
+) -> dict:
+    """Issue a partial refund. refund_pct is 0.0â€“1.0."""
     refund_amount = round(full_amount * refund_pct, 2)
     return _record("partial_refund", dispute_id, order_id, refund_amount, {
         "buyer_id": buyer_id,
@@ -77,7 +77,7 @@ def issue_partial_refund(
 
 
 @mcp.tool()
-def initiate_replacement(dispute_id: str, order_id: str, buyer_id: str, seller_id: str) -> dict[str, Any]:
+def initiate_replacement(dispute_id: str, order_id: str, buyer_id: str, seller_id: str) -> dict:
     """Initiate a replacement shipment request to the seller."""
     return _record("replacement", dispute_id, order_id, None, {
         "buyer_id": buyer_id,
@@ -89,7 +89,7 @@ def initiate_replacement(dispute_id: str, order_id: str, buyer_id: str, seller_i
 
 
 @mcp.tool()
-def deny_claim(dispute_id: str, order_id: str, buyer_id: str, reason: str) -> dict[str, Any]:
+def deny_claim(dispute_id: str, order_id: str, buyer_id: str, reason: str) -> dict:
     """Record a claim denial. No financial action taken."""
     return _record("deny", dispute_id, order_id, None, {
         "buyer_id": buyer_id,
@@ -101,7 +101,7 @@ def deny_claim(dispute_id: str, order_id: str, buyer_id: str, reason: str) -> di
 @mcp.tool()
 def initiate_return_then_refund(
     dispute_id: str, order_id: str, buyer_id: str, seller_id: str, amount: float
-) -> dict[str, Any]:
+) -> dict:
     """Create a return label for the buyer; refund issued on confirmed return."""
     return _record("return_then_refund", dispute_id, order_id, amount, {
         "buyer_id": buyer_id,
@@ -113,7 +113,7 @@ def initiate_return_then_refund(
 
 
 @mcp.tool()
-def get_ledger(dispute_id: Optional[str] = None) -> list[dict[str, Any]]:
+def get_ledger(dispute_id: Optional[str] = None) -> list:
     """Retrieve resolution ledger entries, optionally filtered by dispute_id."""
     ledger = _load_ledger()
     if dispute_id:

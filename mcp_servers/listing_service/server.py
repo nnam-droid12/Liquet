@@ -1,4 +1,4 @@
-"""Listing Service MCP server — product listing text and reference images."""
+﻿"""Listing Service MCP server â€” product listing text and reference images."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("listing_service")
 
 _DATA_FILE = Path(__file__).parent.parent.parent / "data" / "listings.json"
-_listings: dict[str, dict[str, Any]] = {}
+_listings: dict[str, dict] = {}
 
 
 def _load_data() -> None:
@@ -69,7 +69,7 @@ def _load_data() -> None:
 
 
 @mcp.tool()
-def get_listing(product_id: str) -> dict[str, Any]:
+def get_listing(product_id: str) -> dict:
     """Get the product listing including title, description, condition, and reference image URLs."""
     _load_data()
     listing = _listings.get(product_id)
@@ -79,7 +79,7 @@ def get_listing(product_id: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def get_listing_for_order(order_id: str, product_id: str) -> dict[str, Any]:
+def get_listing_for_order(order_id: str, product_id: str) -> dict:
     """Get listing info for an order's product (what was promised to the buyer)."""
     return get_listing(product_id)
 

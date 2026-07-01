@@ -1,5 +1,5 @@
-"""
-Vision Intake MCP server — wraps qwen-vl-plus (qwen3.6-plus) for dispute photo analysis.
+﻿"""
+Vision Intake MCP server â€” wraps qwen-vl-plus (qwen3.6-plus) for dispute photo analysis.
 
 Perception is cleanly separated from judgment:
 - This server does ONLY visual observation (what does the image show?)
@@ -21,7 +21,7 @@ Describe what you observe with precision:
 2. Note the condition: any damage, discoloration, missing parts, or anomalies
 3. Note the color(s) visible
 4. If packaging is visible, note its condition
-5. Do NOT interpret or assign fault — only describe what you see
+5. Do NOT interpret or assign fault â€” only describe what you see
 
 Respond with a JSON object:
 {
@@ -37,7 +37,7 @@ Respond with a JSON object:
 
 
 @mcp.tool()
-def analyze_image(image_url: str, listing_description: Optional[str] = None) -> dict[str, Any]:
+def analyze_image(image_url: str, listing_description: Optional[str] = None) -> dict:
     """
     Analyze a dispute evidence image using the vision model.
     Returns structured observations: damage, color, condition mismatch signals.
@@ -47,7 +47,7 @@ def analyze_image(image_url: str, listing_description: Optional[str] = None) -> 
     )
 
 
-async def _analyze_image_async(image_url: str, listing_description: Optional[str]) -> dict[str, Any]:
+async def _analyze_image_async(image_url: str, listing_description: Optional[str]) -> dict:
     try:
         import sys
         import os
@@ -88,8 +88,8 @@ async def _analyze_image_async(image_url: str, listing_description: Optional[str
 
 
 @mcp.tool()
-def analyze_image_mock(image_url: str, listing_description: Optional[str] = None) -> dict[str, Any]:
-    """Mock vision analysis for offline testing — returns deterministic results based on URL keywords."""
+def analyze_image_mock(image_url: str, listing_description: Optional[str] = None) -> dict:
+    """Mock vision analysis for offline testing â€” returns deterministic results based on URL keywords."""
     url_lower = image_url.lower()
 
     if "damage" in url_lower or "broken" in url_lower or "crack" in url_lower:
