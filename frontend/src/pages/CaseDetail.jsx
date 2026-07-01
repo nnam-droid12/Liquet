@@ -192,6 +192,15 @@ export default function CaseDetail() {
                 {dispute.status === 'failed' ? '↺ Retry Autopilot' : '⚡ Run Autopilot'}
               </button>
             )}
+            {decision && (
+              <a
+                href={`/api/cases/${disputeId}/export`}
+                download
+                className="text-xs text-gray-400 hover:text-gray-600 underline"
+              >
+                ↓ Export JSON
+              </a>
+            )}
             {dispute.status === 'failed' && !investigating && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-100 text-red-700 border border-red-300 text-sm font-medium">
                 ✕ Investigation failed — retry above
