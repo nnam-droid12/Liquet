@@ -31,10 +31,20 @@ async def create_dispute(
 @router.get("/", response_model=list[Dispute])
 async def list_disputes(
     status: Optional[str] = None,
+    buyer_id: Optional[str] = None,
+    seller_id: Optional[str] = None,
+    dispute_type: Optional[str] = None,
     session: AsyncSession = Depends(get_session),
 ) -> list[Dispute]:
     repo = DisputeRepository(session)
-    return await repo.list_all(status=status)
+    disputes = await repo.list_all(status=status)
+    if buyer_id:
+        disputes = [d for d in disputes if d.buyer_id == buyer_id]
+    if seller_id:
+        disputes = [d for d in disputes if d.seller_id == seller_id]
+    if dispute_type:
+        disputes = [d for d in disputes if d.dispute_type.value == dispute_type]
+    return disputes
 
 
 @router.get("/{dispute_id}", response_model=Dispute)
