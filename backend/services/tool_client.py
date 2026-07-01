@@ -65,9 +65,9 @@ class ToolClient:
 
         if use_real:
             import asyncio
-            return await mod._analyze_image_async(image_url, listing_description or None)
+            return await mod._analyze_image_async(image_url, listing_description or "")
         else:
-            return mod.analyze_image_mock(image_url, listing_description or None)
+            return mod.analyze_image_mock(image_url, listing_description or "")
 
     # ── Policy engine ─────────────────────────────────────────────────────────
     async def evaluate_policy(self, case_summary: dict[str, Any]) -> dict[str, Any]:

@@ -113,7 +113,7 @@ def initiate_return_then_refund(
 
 
 @mcp.tool()
-def get_ledger(dispute_id: Optional[str] = None) -> list:
+def get_ledger(dispute_id: str = "") -> list:
     """Retrieve resolution ledger entries, optionally filtered by dispute_id."""
     ledger = _load_ledger()
     if dispute_id:

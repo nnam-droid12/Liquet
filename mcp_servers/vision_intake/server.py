@@ -37,7 +37,7 @@ Respond with a JSON object:
 
 
 @mcp.tool()
-def analyze_image(image_url: str, listing_description: Optional[str] = None) -> dict:
+def analyze_image(image_url: str, listing_description: str = "") -> dict:
     """
     Analyze a dispute evidence image using the vision model.
     Returns structured observations: damage, color, condition mismatch signals.
@@ -88,7 +88,7 @@ async def _analyze_image_async(image_url: str, listing_description: Optional[str
 
 
 @mcp.tool()
-def analyze_image_mock(image_url: str, listing_description: Optional[str] = None) -> dict:
+def analyze_image_mock(image_url: str, listing_description: str = "") -> dict:
     """Mock vision analysis for offline testing â€” returns deterministic results based on URL keywords."""
     url_lower = image_url.lower()
 
