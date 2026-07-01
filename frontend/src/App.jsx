@@ -31,9 +31,7 @@ export default function App() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <span className="text-white font-bold text-xl tracking-tight">LIQUET</span>
-              <span className="text-blue-300 text-xs font-mono border border-blue-600 rounded px-1.5 py-0.5">
-                Track 4: Autopilot Agent
-              </span>
+              <span className="text-blue-300 text-xs font-mono">Autonomous Dispute Resolution</span>
             </div>
             <div className="flex gap-2">
               <NavItem to="/">Dashboard</NavItem>
