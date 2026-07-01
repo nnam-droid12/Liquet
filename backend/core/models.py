@@ -195,6 +195,10 @@ class Decision(BaseModel):
     actor: Actor = Actor.AGENT
     actor_id: Optional[str] = None
     decided_at: datetime = Field(default_factory=datetime.utcnow)
+    # Innovative feature results (populated after first investigation)
+    ghost_case_result: Optional[GhostCaseResult] = None
+    stability_result: Optional[StabilityResult] = None
+    skeptic_result: Optional[SkepticResult] = None
 
 
 # ── Human queue ────────────────────────────────────────────────────────────────
@@ -264,3 +268,43 @@ class VisionAnalysis(BaseModel):
     matches_listing: Optional[bool] = None
     confidence: float
     raw_description: str
+
+
+# ── Ghost Cases ────────────────────────────────────────────────────────────────
+
+class GhostCaseResult(BaseModel):
+    """Cross-dispute pattern analysis — similar past disputes as synthetic evidence."""
+    similar_cases_count: int
+    seller_dispute_rate: float
+    pattern_match_score: float
+    dominant_resolution: Optional[str] = None
+    synthetic_evidence: Optional[EvidenceItem] = None
+    weight: float = 0.0
+
+
+# ── Verdict Stability ──────────────────────────────────────────────────────────
+
+class StabilityRun(BaseModel):
+    run_index: int
+    resolution: str
+    confidence: float
+
+
+class StabilityResult(BaseModel):
+    """Result of running adjudicator 3× with shuffled evidence order."""
+    runs: list[StabilityRun]
+    stability_score: float          # 1.0=all agree, 0.67=2/3 agree, 0.33=all differ
+    effective_confidence: float     # raw_confidence × stability_score
+    is_stable: bool
+    verdict_distribution: dict[str, int] = Field(default_factory=dict)
+
+
+# ── Skeptic Pass ───────────────────────────────────────────────────────────────
+
+class SkepticResult(BaseModel):
+    """Result of the adversarial devil's-advocate second-opinion pass."""
+    devil_argument: str
+    rebuttal: str
+    rebuttal_strength: float        # 0.0=can't rebut, 1.0=fully neutralised
+    verdict_contested: bool         # True when rebuttal_strength < 0.55
+    contest_summary: str
