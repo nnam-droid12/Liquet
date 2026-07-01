@@ -4,6 +4,7 @@ import GhostCasesPanel from '../components/GhostCasesPanel.jsx'
 import StabilityGauge from '../components/StabilityGauge.jsx'
 import SkepticPanel from '../components/SkepticPanel.jsx'
 import ConfidenceBreakdown from '../components/ConfidenceBreakdown.jsx'
+import AuditTimeline from '../components/AuditTimeline.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -305,33 +306,8 @@ export default function CaseDetail() {
           </h2>
           <LiveIndicator active={investigating} />
         </div>
-        {audit.length === 0 && !investigating && (
-          <p className="text-gray-400 text-sm">No audit events yet. Run the autopilot to see agent steps here.</p>
-        )}
-        {investigating && audit.length === 0 && (
-          <div className="space-y-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-5 bg-gray-100 rounded animate-pulse w-3/4" />
-            ))}
-          </div>
-        )}
-        <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-          {audit.map(e => (
-            <div key={e.id} className="flex gap-3 text-sm">
-              <span className="text-gray-400 text-xs font-mono w-28 shrink-0 pt-0.5">
-                {new Date(e.timestamp).toLocaleTimeString()}
-              </span>
-              <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 h-fit ${
-                e.actor === 'agent' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-              }`}>{e.actor}</span>
-              <div>
-                <span className="font-medium text-gray-800">{e.event}</span>
-                {Object.keys(e.data || {}).length > 0 && (
-                  <div className="text-gray-500 text-xs mt-0.5">{JSON.stringify(e.data)}</div>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="max-h-[500px] overflow-y-auto pr-1">
+          <AuditTimeline audit={audit} investigating={investigating} />
           <div ref={auditEndRef} />
         </div>
       </div>
