@@ -26,6 +26,7 @@ function NavItem({ to, children }) {
 }
 
 function AppShell({ children }) {
+  const pendingCount = usePendingCount()
   return (
     <div className="min-h-screen flex flex-col">
       <nav className="bg-blue-800 shadow-lg">
@@ -43,7 +44,21 @@ function AppShell({ children }) {
               <NavItem to="/dashboard">Dashboard</NavItem>
               <NavItem to="/queue">Non-Liquet Queue</NavItem>
               <NavItem to="/seller-risk">Seller Risk</NavItem>
-              <NavItem to="/new">New Dispute</NavItem>
+              <NavLink
+                to="/new"
+                className={({ isActive }) =>
+                  `relative px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-600 hover:text-white'
+                  }`
+                }
+              >
+                New Dispute
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
+              </NavLink>
             </div>
           </div>
         </div>
@@ -60,6 +75,21 @@ function AppShell({ children }) {
       </footer>
     </div>
   )
+}
+
+function usePendingCount() {
+  const [count, setCount] = React.useState(0)
+  useEffect(() => {
+    const refresh = () =>
+      fetch('/api/disputes/?status=open')
+        .then(r => r.json())
+        .then(d => setCount(Array.isArray(d) ? d.length : 0))
+        .catch(() => {})
+    refresh()
+    const id = setInterval(refresh, 30000)
+    return () => clearInterval(id)
+  }, [])
+  return count
 }
 
 export default function App() {
