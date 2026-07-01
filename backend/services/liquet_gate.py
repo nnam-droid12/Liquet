@@ -13,7 +13,9 @@ from typing import Optional
 
 import structlog
 
-from backend.core.models import CaseFile, GateResult, ResolutionType, Verdict
+from backend.core.models import (
+    CaseFile, GateResult, ResolutionType, SkepticResult, StabilityResult, Verdict,
+)
 from config import settings
 
 logger = structlog.get_logger(__name__)
@@ -28,25 +30,45 @@ class LiquetGate:
         self.conf_threshold = conf_threshold or settings.conf_threshold
         self.value_threshold = value_threshold or settings.value_threshold
 
-    def evaluate(self, verdict: Verdict, case_file: CaseFile) -> tuple[GateResult, Optional[str]]:
+    def evaluate(
+        self,
+        verdict: Verdict,
+        case_file: CaseFile,
+        stability: Optional[StabilityResult] = None,
+        skeptic: Optional[SkepticResult] = None,
+    ) -> tuple[GateResult, Optional[str]]:
         """
         Returns (GateResult, abstention_reason).
-        abstention_reason is None for LIQUET, a human-readable explanation for NON_LIQUET.
+
+        Applies three layers on top of classic confidence/value/contradiction gates:
+        - Stability: if verdict changed across shuffled runs, use effective_confidence
+        - Skeptic:   if rebuttal was weak, force NON_LIQUET regardless of confidence
         """
         reasons: list[str] = []
 
-        # Confidence gate
-        if verdict.confidence < self.conf_threshold:
+        # Use stability-adjusted confidence when available
+        effective_conf = verdict.confidence
+        if stability is not None:
+            effective_conf = stability.effective_confidence
+            if not stability.is_stable:
+                reasons.append(
+                    f"Verdict is unstable across evidence orderings "
+                    f"(stability={stability.stability_score:.0%}, distribution={stability.verdict_distribution}) "
+                    f"— effective confidence reduced to {effective_conf:.2f}"
+                )
+
+        # Confidence gate (using effective confidence)
+        if effective_conf < self.conf_threshold:
             reasons.append(
-                f"Confidence {verdict.confidence:.2f} is below threshold {self.conf_threshold:.2f} — "
-                f"evidence is insufficient for autonomous resolution"
+                f"Effective confidence {effective_conf:.2f} is below threshold "
+                f"{self.conf_threshold:.2f}"
             )
 
         # Value gate
         if case_file.order_value >= self.value_threshold:
             reasons.append(
-                f"Order value ${case_file.order_value:.2f} exceeds ${self.value_threshold:.2f} limit "
-                f"(policy V-001: high-value orders require human review)"
+                f"Order value ${case_file.order_value:.2f} exceeds "
+                f"${self.value_threshold:.2f} limit (policy V-001)"
             )
 
         # Hard contradiction gate
@@ -55,14 +77,26 @@ class LiquetGate:
                 f"Unresolved hard contradiction: {case_file.hard_contradictions[0]}"
             )
 
-        # Resolution == ESCALATE means LLM itself flagged it
+        # LLM self-escalation
         if verdict.resolution == ResolutionType.ESCALATE:
             reasons.append("Adjudicator flagged case as requiring human review")
+
+        # Skeptic veto — if the adjudicator couldn't rebut its own challenge
+        if skeptic is not None and skeptic.verdict_contested:
+            reasons.append(
+                f"Skeptic pass contested verdict (rebuttal strength "
+                f"{skeptic.rebuttal_strength:.0%} < 55%): {skeptic.contest_summary}"
+            )
 
         if reasons:
             abstention = " | ".join(reasons)
             logger.info("gate_non_liquet", reasons=reasons)
             return GateResult.NON_LIQUET, abstention
 
-        logger.info("gate_liquet", confidence=verdict.confidence, value=case_file.order_value)
+        logger.info(
+            "gate_liquet",
+            confidence=verdict.confidence,
+            effective_conf=effective_conf,
+            value=case_file.order_value,
+        )
         return GateResult.LIQUET, None
