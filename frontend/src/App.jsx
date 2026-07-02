@@ -29,6 +29,7 @@ function NavItem({ to, children }) {
 
 function AppShell({ children }) {
   const pendingCount = usePendingCount()
+  const [mobileOpen, setMobileOpen] = React.useState(false)
   return (
     <div className="min-h-screen flex flex-col">
       <nav className="bg-blue-800 shadow-lg">
@@ -42,10 +43,11 @@ function AppShell({ children }) {
                 Autonomous Dispute Resolution
               </span>
             </div>
-            <div className="flex gap-2">
+            {/* Desktop nav */}
+            <div className="hidden lg:flex gap-2">
               <NavItem to="/dashboard">Dashboard</NavItem>
               <NavItem to="/analytics">Analytics</NavItem>
-              <NavItem to="/queue">Non-Liquet Queue</NavItem>
+              <NavItem to="/queue">Queue</NavItem>
               <NavItem to="/seller-risk">Seller Risk</NavItem>
               <NavItem to="/timeline">Timeline</NavItem>
               <NavLink
@@ -64,8 +66,42 @@ function AppShell({ children }) {
                 )}
               </NavLink>
             </div>
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(o => !o)}
+              className="lg:hidden text-white p-2 rounded hover:bg-blue-700 transition-colors"
+              aria-label="Toggle navigation"
+            >
+              {mobileOpen ? '✕' : '☰'}
+            </button>
           </div>
         </div>
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="lg:hidden border-t border-blue-700 bg-blue-800 px-4 pb-3 space-y-1">
+            {[
+              { to: '/dashboard', label: 'Dashboard' },
+              { to: '/analytics', label: 'Analytics' },
+              { to: '/queue', label: 'NON LIQUET Queue' },
+              { to: '/seller-risk', label: 'Seller Risk' },
+              { to: '/timeline', label: 'Timeline' },
+              { to: '/new', label: 'New Dispute' },
+            ].map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-700'
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        )}
       </nav>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
