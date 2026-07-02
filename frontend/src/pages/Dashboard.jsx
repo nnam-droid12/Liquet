@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+function relativeAge(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${Math.max(mins, 1)}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  return new Date(dateStr).toLocaleDateString()
+}
+
 const STATUS_COLOR = {
   open: 'bg-yellow-100 text-yellow-800',
   investigating: 'bg-blue-100 text-blue-800 animate-pulse',
@@ -227,8 +238,8 @@ export default function Dashboard() {
                       <span className={`px-2 py-0.5 rounded text-xs font-bold ${GATE_BADGE.NON_LIQUET}`}>NON LIQUET</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
-                    {new Date(d.created_at).toLocaleDateString()}
+                  <td className="px-4 py-3 text-gray-400 text-xs" title={new Date(d.created_at).toLocaleString()}>
+                    {relativeAge(d.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/cases/${d.id}`} className="text-blue-600 hover:text-blue-800 font-medium text-xs">

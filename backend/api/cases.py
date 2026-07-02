@@ -36,6 +36,26 @@ async def get_decision(
     return decision
 
 
+@router.get("/{dispute_id}/claims")
+async def get_claims(
+    dispute_id: str,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Return extracted buyer and seller claims from the assembled case file."""
+    repo = CaseFileRepository(session)
+    case_file = await repo.get(dispute_id)
+    if case_file is None:
+        raise HTTPException(status_code=404, detail="CaseFile not found — run investigation first")
+    buyer_claims = [c.model_dump() for c in case_file.buyer.claims]
+    seller_claims = [c.model_dump() for c in case_file.seller.claims]
+    return {
+        "dispute_id": dispute_id,
+        "buyer_claims": buyer_claims,
+        "seller_claims": seller_claims,
+        "total": len(buyer_claims) + len(seller_claims),
+    }
+
+
 @router.get("/{dispute_id}/audit", response_model=list[AuditEntry])
 async def get_audit(
     dispute_id: str,
