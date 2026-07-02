@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SkeletonStatGrid, SkeletonTableRows } from '../components/Skeleton.jsx'
+import EmptyState from '../components/EmptyState.jsx'
 
 function relativeAge(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -201,10 +202,14 @@ export default function Dashboard() {
       {loading && <><SkeletonStatGrid /><SkeletonTableRows /></>}
       {error && <div className="text-red-600 text-center py-8">Error: {error}</div>}
       {!loading && !error && filtered.length === 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
-          No disputes found.{' '}
-          <Link to="/new" className="text-blue-600 underline">Create one</Link> to get started.
-        </div>
+        <EmptyState
+          icon="⚖️"
+          title={filter || search ? 'No matching disputes' : 'No disputes yet'}
+          description={filter || search
+            ? 'Try adjusting your filters or search query.'
+            : 'Submit a dispute and let Liquet investigate it autonomously.'}
+          action={!filter && !search ? { to: '/new', label: '+ New Dispute' } : undefined}
+        />
       )}
       {!loading && !error && filtered.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
