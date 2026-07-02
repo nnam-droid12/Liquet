@@ -156,7 +156,12 @@ export default function NewDispute() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Buyer's Account *</label>
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-sm font-medium text-gray-700">Buyer's Account *</label>
+            <span className="text-xs text-gray-400">
+              {form.buyer_narrative.trim().split(/\s+/).filter(Boolean).length} words
+            </span>
+          </div>
           <textarea
             required value={form.buyer_narrative}
             onChange={e => set('buyer_narrative', e.target.value)}
@@ -167,7 +172,12 @@ export default function NewDispute() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Seller's Account</label>
+          <div className="flex justify-between items-center mb-1">
+            <label className="text-sm font-medium text-gray-700">Seller's Account</label>
+            <span className="text-xs text-gray-400">
+              {form.seller_narrative ? form.seller_narrative.trim().split(/\s+/).filter(Boolean).length + ' words' : 'optional'}
+            </span>
+          </div>
           <textarea
             value={form.seller_narrative}
             onChange={e => set('seller_narrative', e.target.value)}
