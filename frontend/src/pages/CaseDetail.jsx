@@ -8,6 +8,9 @@ import AuditTimeline from '../components/AuditTimeline.jsx'
 import SellerReplyForm from '../components/SellerReplyForm.jsx'
 import ReviewerNotes from '../components/ReviewerNotes.jsx'
 import BackToTop from '../components/BackToTop.jsx'
+import VerdictNarrator from '../components/VerdictNarrator.jsx'
+import SceneReconstruction from '../components/SceneReconstruction.jsx'
+import ReasoningGlass from '../components/ReasoningGlass.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -350,6 +353,19 @@ export default function CaseDetail() {
           <StabilityGauge stabilityResult={decision.stability_result} />
           <SkepticPanel skepticResult={decision.skeptic_result} />
         </>
+      )}
+
+      {/* Creative AI feature panels — Verdict Narration, Scene Reconstruction, Reasoning Glass */}
+      {decision && (
+        <div className="mb-2">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Creative AI Features</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-blue-200 via-purple-200 to-green-200" />
+          </div>
+          <VerdictNarrator disputeId={disputeId} decision={decision} />
+          <SceneReconstruction disputeId={disputeId} decision={decision} />
+          <ReasoningGlass disputeId={disputeId} decision={decision} />
+        </div>
       )}
 
       {/* Evidence */}

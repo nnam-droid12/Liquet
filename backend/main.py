@@ -32,6 +32,9 @@ from backend.api.notes import router as notes_router
 from backend.api.search import router as search_router
 from backend.api.digest import router as digest_router
 from backend.api.readiness import router as readiness_router
+from backend.api.narrate import router as narrate_router
+from backend.api.visualize import router as visualize_router
+from backend.api.reasoning_ws import router as reasoning_ws_router
 from backend.middleware.request_id import RequestIDMiddleware
 from backend.repositories.database import init_db
 from config import settings
@@ -101,6 +104,9 @@ app.include_router(notes_router, tags=["notes"])
 app.include_router(search_router, tags=["search"])
 app.include_router(digest_router, tags=["digest"])
 app.include_router(readiness_router)
+app.include_router(narrate_router, tags=["creative"])
+app.include_router(visualize_router, tags=["creative"])
+app.include_router(reasoning_ws_router, tags=["creative"])
 
 
 if __name__ == "__main__":
