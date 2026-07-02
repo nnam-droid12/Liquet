@@ -8,6 +8,7 @@ import NewDispute from './pages/NewDispute.jsx'
 import SellerRisk from './pages/SellerRisk.jsx'
 import PolicyBrowser from './pages/PolicyBrowser.jsx'
 import Analytics from './pages/Analytics.jsx'
+import Timeline from './pages/Timeline.jsx'
 
 function NavItem({ to, children }) {
   return (
@@ -46,6 +47,7 @@ function AppShell({ children }) {
               <NavItem to="/analytics">Analytics</NavItem>
               <NavItem to="/queue">Non-Liquet Queue</NavItem>
               <NavItem to="/seller-risk">Seller Risk</NavItem>
+              <NavItem to="/timeline">Timeline</NavItem>
               <NavLink
                 to="/new"
                 className={({ isActive }) =>
@@ -114,6 +116,7 @@ export default function App() {
         <Route path="/seller-risk" element={<SellerRisk />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/policy" element={<PolicyBrowser />} />
+        <Route path="/timeline" element={<Timeline />} />
         <Route path="/new" element={<NewDispute />} />
       </Routes>
     </AppShell>
