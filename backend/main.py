@@ -29,6 +29,7 @@ from backend.api.mcp_status import router as mcp_status_router
 from backend.api.batch import router as batch_router
 from backend.api.metrics import router as metrics_router
 from backend.api.notes import router as notes_router
+from backend.api.search import router as search_router
 from backend.middleware.request_id import RequestIDMiddleware
 from backend.repositories.database import init_db
 from config import settings
@@ -95,6 +96,7 @@ app.include_router(mcp_status_router, tags=["mcp"])
 app.include_router(batch_router, tags=["batch"])
 app.include_router(metrics_router, tags=["metrics"])
 app.include_router(notes_router, tags=["notes"])
+app.include_router(search_router, tags=["search"])
 
 
 if __name__ == "__main__":
