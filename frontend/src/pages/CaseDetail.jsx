@@ -77,6 +77,50 @@ function CopyButton({ text, label }) {
   )
 }
 
+const EVIDENCE_TYPES = ['all', 'carrier_scan', 'order_record', 'listing_data', 'photo', 'message', 'user_claim']
+
+function EvidenceSection({ evidence, hardContradictions }) {
+  const [filter, setFilter] = useState('all')
+  const types = EVIDENCE_TYPES.filter(t => t === 'all' || evidence.some(e => e.evidence_type === t))
+  const filtered = filter === 'all' ? evidence : evidence.filter(e => e.evidence_type === filter)
+  const sorted = [...filtered].sort((a, b) => b.reliability - a.reliability)
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 className="font-bold text-gray-900">
+          Evidence
+          <span className="ml-2 text-gray-400 font-normal text-sm">({sorted.length}/{evidence.length})</span>
+        </h2>
+        <div className="flex flex-wrap gap-1">
+          {types.map(t => (
+            <button
+              key={t}
+              onClick={() => setFilter(t)}
+              className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                filter === t
+                  ? 'bg-blue-700 text-white border-blue-700'
+                  : 'bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100'
+              }`}
+            >
+              {t === 'all' ? `All (${evidence.length})` : t.replace(/_/g, ' ')}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
+        {sorted.map(ev => <EvidenceCard key={ev.id} ev={ev} />)}
+      </div>
+      {hardContradictions?.length > 0 && (
+        <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
+          <div className="font-bold mb-1">Hard Contradiction Detected</div>
+          {hardContradictions.join(' | ')}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function LiveIndicator({ active }) {
   if (!active) return null
   return (
@@ -307,23 +351,7 @@ export default function CaseDetail() {
 
       {/* Evidence */}
       {caseFile && caseFile.evidence?.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="font-bold text-gray-900 mb-4">
-            Evidence ({caseFile.evidence.length} items)
-            <span className="ml-2 text-xs text-gray-400 font-normal">sorted by reliability</span>
-          </h2>
-          <div className="grid md:grid-cols-2 gap-3">
-            {[...caseFile.evidence].sort((a, b) => b.reliability - a.reliability).map(ev => (
-              <EvidenceCard key={ev.id} ev={ev} />
-            ))}
-          </div>
-          {caseFile.hard_contradictions?.length > 0 && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800">
-              <div className="font-bold mb-1">Hard Contradiction</div>
-              {caseFile.hard_contradictions.join(' | ')}
-            </div>
-          )}
-        </div>
+        <EvidenceSection evidence={caseFile.evidence} hardContradictions={caseFile.hard_contradictions} />
       )}
 
       {/* Audit trail — live-updating while agent runs */}
