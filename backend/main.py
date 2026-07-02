@@ -31,6 +31,7 @@ from backend.api.metrics import router as metrics_router
 from backend.api.notes import router as notes_router
 from backend.api.search import router as search_router
 from backend.api.digest import router as digest_router
+from backend.api.readiness import router as readiness_router
 from backend.middleware.request_id import RequestIDMiddleware
 from backend.repositories.database import init_db
 from config import settings
@@ -99,6 +100,7 @@ app.include_router(metrics_router, tags=["metrics"])
 app.include_router(notes_router, tags=["notes"])
 app.include_router(search_router, tags=["search"])
 app.include_router(digest_router, tags=["digest"])
+app.include_router(readiness_router)
 
 
 if __name__ == "__main__":
