@@ -91,13 +91,42 @@ function StatCard({ label, value, suffix, prefix, description }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+function LiveFeed({ disputes }) {
+  if (!disputes || disputes.length === 0) return null
+  return (
+    <div className="mt-8 max-w-lg mx-auto">
+      <div className="text-center text-xs text-slate-500 font-mono mb-3 uppercase tracking-widest">
+        Live Activity
+      </div>
+      <div className="space-y-2">
+        {disputes.slice(0, 4).map(d => (
+          <div key={d.id} className="flex items-center gap-3 bg-slate-800/30 border border-white/5 rounded-lg px-3 py-2">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${
+              d.status === 'resolved' ? 'bg-emerald-400' :
+              d.status === 'escalated' ? 'bg-amber-400' :
+              d.status === 'investigating' ? 'bg-blue-400 animate-pulse' : 'bg-gray-500'
+            }`} />
+            <span className="text-slate-400 text-xs font-mono truncate flex-1">{d.order_id}</span>
+            <span className="text-slate-500 text-xs capitalize shrink-0">{d.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function Landing() {
   const [stats, setStats] = useState(null)
+  const [recent, setRecent] = useState([])
 
   useEffect(() => {
     fetch('/api/stats')
       .then(r => r.ok ? r.json() : null)
       .then(data => setStats(data))
+      .catch(() => {})
+    fetch('/api/disputes/recent?limit=5')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setRecent(data))
       .catch(() => {})
   }, [])
 
@@ -179,6 +208,7 @@ export default function Landing() {
               Submit a Dispute
             </Link>
           </div>
+          <LiveFeed disputes={recent} />
         </div>
       </section>
 
