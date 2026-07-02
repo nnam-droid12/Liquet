@@ -1,4 +1,4 @@
-"""Platform stats endpoint — powers the landing page live counters."""
+"""Platform stats and confidence histogram endpoints."""
 
 from __future__ import annotations
 
@@ -60,4 +60,39 @@ async def get_stats(session: AsyncSession = Depends(get_session)) -> dict:
         "avg_confidence": round(float(avg_confidence), 4),
         "gate_counts": gate_counts,
         "dispute_type_breakdown": type_counts,
+    }
+
+
+@router.get("/api/stats/confidence-histogram")
+async def confidence_histogram(
+    buckets: int = 10,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Return a histogram of verdict confidence scores across all decisions."""
+    from sqlalchemy import text
+
+    buckets = max(2, min(buckets, 20))
+    result = await session.execute(
+        select(DecisionRow.confidence).select_from(DecisionRow)
+    )
+    scores = [float(r) for r in result.scalars() if r is not None]
+
+    if not scores:
+        return {"buckets": buckets, "histogram": [], "min": 0, "max": 0, "mean": 0}
+
+    step = 1.0 / buckets
+    hist = [0] * buckets
+    for s in scores:
+        idx = min(int(s / step), buckets - 1)
+        hist[idx] += 1
+
+    labels = [f"{i/buckets:.0%}–{(i+1)/buckets:.0%}" for i in range(buckets)]
+
+    return {
+        "buckets": buckets,
+        "histogram": [{"range": labels[i], "count": hist[i]} for i in range(buckets)],
+        "min": round(min(scores), 4),
+        "max": round(max(scores), 4),
+        "mean": round(sum(scores) / len(scores), 4),
+        "total": len(scores),
     }
