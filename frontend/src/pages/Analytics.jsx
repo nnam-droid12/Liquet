@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import DigestWidget from './DigestWidget.jsx'
 
 function MetricCard({ label, value, sub, color = 'text-gray-800' }) {
   return (
@@ -182,6 +183,11 @@ export default function Analytics() {
         <MetricCard label="Auto-resolution rate" value={`${autoRate}%`} sub="LIQUET gate" color="text-emerald-600" />
         <MetricCard label="Avg confidence" value={`${avgConf}%`} sub="across all verdicts" color="text-blue-600" />
         <MetricCard label="High-risk sellers" value={highRisk} sub="recurring pattern ≥70%" color="text-red-600" />
+      </div>
+
+      {/* 24h digest */}
+      <div className="mb-6">
+        <DigestWidget />
       </div>
 
       {/* Confidence histogram */}
