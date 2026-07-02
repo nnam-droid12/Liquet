@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { SkeletonStatGrid, SkeletonTableRows } from '../components/Skeleton.jsx'
 
 function relativeAge(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime()
@@ -197,7 +198,7 @@ export default function Dashboard() {
       </div>
 
       {/* Table */}
-      {loading && <div className="text-gray-500 text-center py-8">Loading disputes…</div>}
+      {loading && <><SkeletonStatGrid /><SkeletonTableRows /></>}
       {error && <div className="text-red-600 text-center py-8">Error: {error}</div>}
       {!loading && !error && filtered.length === 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
