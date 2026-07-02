@@ -135,6 +135,8 @@ export default function Analytics() {
     })
   }, [])
 
+  const [refreshed, setRefreshed] = useState(null)
+
   if (loading) return <div className="text-gray-400 text-center py-12">Loading analytics…</div>
 
   const autoRate = stats ? Math.round(stats.auto_resolution_rate * 100) : 0
@@ -145,12 +147,34 @@ export default function Analytics() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Platform Analytics</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Live metrics from the Liquet adjudication engine
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Platform Analytics</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Live metrics from the Liquet adjudication engine
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            setLoading(true)
+            Promise.all([
+              fetch('/api/stats').then(r => r.ok ? r.json() : null),
+              fetch('/api/mcp-status').then(r => r.ok ? r.json() : null),
+              fetch('/api/seller-risk').then(r => r.ok ? r.json() : []),
+              fetch('/api/metrics/daily?days=30').then(r => r.ok ? r.json() : null),
+              fetch('/api/stats/confidence-histogram?buckets=10').then(r => r.ok ? r.json() : null),
+            ]).then(([s, m, r, d, h]) => {
+              setStats(s); setMcpStatus(m); setSellerRisk(r || [])
+              setDailyMetrics(d); setConfHistogram(h)
+              setLoading(false); setRefreshed(new Date().toLocaleTimeString())
+            })
+          }}
+          className="text-xs text-gray-500 hover:text-gray-800 border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 transition-colors"
+        >
+          ↺ Refresh
+        </button>
       </div>
+      {refreshed && <p className="text-xs text-gray-400 mb-4">Last refreshed at {refreshed}</p>}
 
       {/* Key metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
