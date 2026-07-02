@@ -24,6 +24,7 @@ export default function SellerRisk() {
   const [sellers, setSellers] = useState([])
   const [loading, setLoading] = useState(true)
   const [riskFilter, setRiskFilter] = useState('')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     fetch('/api/seller-risk')
@@ -32,7 +33,9 @@ export default function SellerRisk() {
       .catch(() => setLoading(false))
   }, [])
 
-  const filtered = riskFilter ? sellers.filter(s => s.risk_level === riskFilter) : sellers
+  const filtered = sellers
+    .filter(s => !riskFilter || s.risk_level === riskFilter)
+    .filter(s => !search || s.seller_id.toLowerCase().includes(search.toLowerCase()))
   const highRisk = sellers.filter(s => s.risk_level === 'HIGH').length
   const medRisk = sellers.filter(s => s.risk_level === 'MEDIUM').length
 
@@ -61,7 +64,16 @@ export default function SellerRisk() {
         </div>
       </div>
 
-      {/* Filter */}
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search by seller ID…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
       <div className="flex gap-2 mb-4">
         {['', 'HIGH', 'MEDIUM', 'LOW'].map(r => (
           <button
@@ -102,9 +114,17 @@ export default function SellerRisk() {
                     {(seller.platform_share * 100).toFixed(1)}% of platform
                   </div>
                 </div>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${RISK_COLOR[seller.risk_level]}`}>
-                  {seller.risk_level} RISK
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${RISK_COLOR[seller.risk_level]}`}>
+                    {seller.risk_level} RISK
+                  </span>
+                  <Link
+                    to={`/dashboard?seller_id=${seller.seller_id}`}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    View cases →
+                  </Link>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-3 gap-4">
