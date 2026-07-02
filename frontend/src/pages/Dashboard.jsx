@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { SkeletonStatGrid, SkeletonTableRows } from '../components/Skeleton.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import { DISPUTE_TYPE_ICON, relativeAge as formatAge } from '../utils/disputeUtils.js'
+import useDebounce from '../hooks/useDebounce.js'
 
 
 const STATUS_COLOR = {
@@ -72,6 +73,7 @@ export default function Dashboard() {
   const [bulkResult, setBulkResult] = useState(null)
   const [searchParams] = useSearchParams()
   const sellerIdParam = searchParams.get('seller_id') || ''
+  const debouncedSearch = useDebounce(search, 250)
 
   const refresh = React.useCallback(() => {
     Promise.all([
@@ -93,9 +95,10 @@ export default function Dashboard() {
   const filtered = disputes
     .filter(d => !filter || d.status === filter)
     .filter(d => !sellerIdParam || d.seller_id === sellerIdParam)
-    .filter(d => !search || d.order_id.toLowerCase().includes(search.toLowerCase()) ||
-      d.id.toLowerCase().includes(search.toLowerCase()) ||
-      d.dispute_type.includes(search.toLowerCase()))
+    .filter(d => !debouncedSearch || d.order_id.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      d.id.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      d.dispute_type.includes(debouncedSearch.toLowerCase()) ||
+      d.buyer_narrative?.toLowerCase().includes(debouncedSearch.toLowerCase()))
 
   const localStats = {
     total: disputes.length,
