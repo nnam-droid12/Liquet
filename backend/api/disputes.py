@@ -113,6 +113,9 @@ async def patch_dispute(
     return await repo.get(dispute_id)
 
 
+MAX_RETRY_ATTEMPTS = 3
+
+
 @router.post("/{dispute_id}/investigate", status_code=202)
 async def investigate_dispute(
     dispute_id: str,
@@ -123,8 +126,23 @@ async def investigate_dispute(
     dispute = await repo.get(dispute_id)
     if dispute is None:
         raise HTTPException(status_code=404, detail="Dispute not found")
-    if dispute.status not in (DisputeStatus.OPEN, DisputeStatus.INVESTIGATING):
+    if dispute.status not in (DisputeStatus.OPEN, DisputeStatus.INVESTIGATING, DisputeStatus.FAILED):
         raise HTTPException(status_code=409, detail=f"Dispute already in status: {dispute.status}")
+
+    retry_count = int(dispute.metadata.get("retry_count", 0))
+    if retry_count >= MAX_RETRY_ATTEMPTS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Max retry attempts ({MAX_RETRY_ATTEMPTS}) reached. Close and reopen the dispute to reset.",
+        )
+
+    # Increment retry counter in metadata
+    await session.execute(
+        update(DisputeRow)
+        .where(DisputeRow.id == dispute_id)
+        .values(metadata_json={**dispute.metadata, "retry_count": retry_count + 1})
+    )
+    await session.commit()
 
     orchestrator = DisputeOrchestrator(session)
     try:
