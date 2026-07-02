@@ -7,6 +7,7 @@ from typing import Optional
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -96,20 +97,21 @@ async def get_dispute(
     return dispute
 
 
-@router.delete("/{dispute_id}", status_code=204)
+@router.delete("/{dispute_id}", status_code=204, response_class=Response)
 async def close_dispute(
     dispute_id: str,
     session: AsyncSession = Depends(get_session),
-) -> None:
+) -> Response:
     """Soft-close a dispute (status → closed). Does not delete the record."""
     repo = DisputeRepository(session)
     dispute = await repo.get(dispute_id)
     if dispute is None:
         raise HTTPException(status_code=404, detail="Dispute not found")
     if dispute.status == DisputeStatus.CLOSED:
-        return  # idempotent
+        return Response(status_code=204)
     await repo.update_status(dispute_id, DisputeStatus.CLOSED)
     logger.info("dispute_closed", dispute_id=dispute_id)
+    return Response(status_code=204)
 
 
 @router.patch("/{dispute_id}", response_model=Dispute)
