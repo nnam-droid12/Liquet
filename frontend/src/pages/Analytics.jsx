@@ -77,11 +77,45 @@ function DailyBarChart({ data, label }) {
   )
 }
 
+function ConfidenceHistogram({ data }) {
+  if (!data || data.histogram.length === 0) return null
+  const max = Math.max(...data.histogram.map(b => b.count), 1)
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mb-6">
+      <div className="font-bold text-gray-900 mb-1">Confidence Distribution</div>
+      <div className="text-xs text-gray-400 mb-4">
+        {data.total} verdicts · min {Math.round(data.min * 100)}% · max {Math.round(data.max * 100)}% · mean {Math.round(data.mean * 100)}%
+      </div>
+      <div className="flex items-end gap-1 h-24">
+        {data.histogram.map((b, i) => {
+          const pct = Math.round((b.count / max) * 100)
+          const isHigh = i >= data.histogram.length * 0.8
+          return (
+            <div key={b.range} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className={`w-full rounded-t transition-all ${isHigh ? 'bg-emerald-500' : 'bg-blue-400'}`}
+                style={{ height: `${Math.max(pct, b.count > 0 ? 4 : 0)}%` }}
+                title={`${b.range}: ${b.count}`}
+              />
+            </div>
+          )
+        })}
+      </div>
+      <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+        <span>0%</span>
+        <span>50%</span>
+        <span>100%</span>
+      </div>
+    </div>
+  )
+}
+
 export default function Analytics() {
   const [stats, setStats] = useState(null)
   const [mcpStatus, setMcpStatus] = useState(null)
   const [sellerRisk, setSellerRisk] = useState([])
   const [dailyMetrics, setDailyMetrics] = useState(null)
+  const [confHistogram, setConfHistogram] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -90,11 +124,13 @@ export default function Analytics() {
       fetch('/api/mcp-status').then(r => r.ok ? r.json() : null),
       fetch('/api/seller-risk').then(r => r.ok ? r.json() : []),
       fetch('/api/metrics/daily?days=30').then(r => r.ok ? r.json() : null),
-    ]).then(([statsData, mcpData, riskData, daily]) => {
+      fetch('/api/stats/confidence-histogram?buckets=10').then(r => r.ok ? r.json() : null),
+    ]).then(([statsData, mcpData, riskData, daily, histogram]) => {
       setStats(statsData)
       setMcpStatus(mcpData)
       setSellerRisk(riskData || [])
       setDailyMetrics(daily)
+      setConfHistogram(histogram)
       setLoading(false)
     })
   }, [])
@@ -123,6 +159,9 @@ export default function Analytics() {
         <MetricCard label="Avg confidence" value={`${avgConf}%`} sub="across all verdicts" color="text-blue-600" />
         <MetricCard label="High-risk sellers" value={highRisk} sub="recurring pattern ≥70%" color="text-red-600" />
       </div>
+
+      {/* Confidence histogram */}
+      {confHistogram?.total > 0 && <ConfidenceHistogram data={confHistogram} />}
 
       {/* Daily submissions chart */}
       {dailyMetrics?.submissions?.length > 0 && (
