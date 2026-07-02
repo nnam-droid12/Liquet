@@ -7,6 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue)](https://python.org)
 [![QwenCloud](https://img.shields.io/badge/Powered%20by-QwenCloud-orange)](https://dashscope-intl.aliyuncs.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-liquet.43.98.167.71.sslip.io-brightgreen)](http://liquet.43.98.167.71.sslip.io)
+
+**Live demo:** [http://liquet.43.98.167.71.sslip.io](http://liquet.43.98.167.71.sslip.io) — deployed on Alibaba Cloud ECS (Singapore)
 
 ---
 
