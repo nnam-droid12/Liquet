@@ -24,6 +24,20 @@ const CODE_COLORS = {
   R: 'bg-purple-100 text-purple-700',
 }
 
+function Highlight({ text, term }) {
+  if (!term) return <>{text}</>
+  const parts = text.split(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === term.toLowerCase()
+          ? <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5">{part}</mark>
+          : part
+      )}
+    </>
+  )
+}
+
 export default function PolicyBrowser() {
   const [policy, setPolicy] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -112,9 +126,11 @@ export default function PolicyBrowser() {
               className={`rounded-lg border p-4 flex items-start gap-3 ${cardColor}`}
             >
               <span className={`font-mono font-bold text-xs px-2 py-1 rounded shrink-0 ${codeColor}`}>
-                {clause.code}
+                <Highlight text={clause.code} term={search} />
               </span>
-              <span className="text-sm">{clause.description}</span>
+              <span className="text-sm">
+                <Highlight text={clause.description} term={search} />
+              </span>
             </div>
           )
         })}
