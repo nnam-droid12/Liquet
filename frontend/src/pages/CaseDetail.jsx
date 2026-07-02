@@ -5,6 +5,7 @@ import StabilityGauge from '../components/StabilityGauge.jsx'
 import SkepticPanel from '../components/SkepticPanel.jsx'
 import ConfidenceBreakdown from '../components/ConfidenceBreakdown.jsx'
 import AuditTimeline from '../components/AuditTimeline.jsx'
+import SellerReplyForm from '../components/SellerReplyForm.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -54,6 +55,25 @@ function EvidenceCard({ ev }) {
       <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-1">{ev.evidence_type.replace(/_/g, ' ')}</div>
       <div className="text-gray-700 line-clamp-3">{typeof ev.content === 'string' ? ev.content : JSON.stringify(ev.content).slice(0, 200)}</div>
     </div>
+  )
+}
+
+function CopyButton({ text, label }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    })
+  }
+  return (
+    <button
+      onClick={copy}
+      className="text-xs text-gray-400 hover:text-gray-600 transition-colors ml-1"
+      title={`Copy ${label}`}
+    >
+      {copied ? '✓' : '⎘'}
+    </button>
   )
 }
 
@@ -168,10 +188,11 @@ export default function CaseDetail() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm text-gray-500 flex items-center gap-1">
         <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-        <span className="mx-2">›</span>
-        <span className="text-gray-800 font-medium">Case {disputeId.slice(0, 8)}</span>
+        <span className="mx-1">›</span>
+        <span className="text-gray-800 font-medium font-mono">{disputeId.slice(0, 8)}</span>
+        <CopyButton text={disputeId} label="dispute ID" />
       </div>
 
       {/* Header */}
@@ -222,6 +243,13 @@ export default function CaseDetail() {
             <p className="text-sm text-gray-700">
               {dispute.seller_narrative || <em className="text-gray-400">No response yet</em>}
             </p>
+            {!decision && (dispute.status === 'open' || dispute.status === 'investigating') && (
+              <SellerReplyForm
+                disputeId={disputeId}
+                currentNarrative={dispute.seller_narrative}
+                onSaved={() => load()}
+              />
+            )}
           </div>
         </div>
       </div>
