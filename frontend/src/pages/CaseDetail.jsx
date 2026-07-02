@@ -7,6 +7,7 @@ import ConfidenceBreakdown from '../components/ConfidenceBreakdown.jsx'
 import AuditTimeline from '../components/AuditTimeline.jsx'
 import SellerReplyForm from '../components/SellerReplyForm.jsx'
 import ReviewerNotes from '../components/ReviewerNotes.jsx'
+import BackToTop from '../components/BackToTop.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -232,6 +233,7 @@ export default function CaseDetail() {
 
   return (
     <div>
+      <BackToTop />
       {/* Breadcrumb */}
       <div className="mb-4 text-sm text-gray-500 flex items-center gap-1">
         <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
