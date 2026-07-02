@@ -2,17 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SkeletonStatGrid, SkeletonTableRows } from '../components/Skeleton.jsx'
 import EmptyState from '../components/EmptyState.jsx'
+import { DISPUTE_TYPE_ICON, relativeAge as formatAge } from '../utils/disputeUtils.js'
 
-function relativeAge(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 60) return `${Math.max(mins, 1)}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return new Date(dateStr).toLocaleDateString()
-}
 
 const STATUS_COLOR = {
   open: 'bg-yellow-100 text-yellow-800',
@@ -241,7 +232,10 @@ export default function Dashboard() {
                 <tr key={d.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{d.id.slice(0, 8)}</td>
                   <td className="px-4 py-3 font-medium">{d.order_id}</td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">{d.dispute_type.replace(/_/g, ' ')}</td>
+                  <td className="px-4 py-3 text-gray-600 capitalize">
+                    <span className="mr-1">{DISPUTE_TYPE_ICON[d.dispute_type] || '❓'}</span>
+                    {d.dispute_type.replace(/_/g, ' ')}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLOR[d.status] || 'bg-gray-100 text-gray-600'}`}>
                       {d.status}
@@ -256,7 +250,7 @@ export default function Dashboard() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs" title={new Date(d.created_at).toLocaleString()}>
-                    {relativeAge(d.created_at)}
+                    {formatAge(d.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/cases/${d.id}`} className="text-blue-600 hover:text-blue-800 font-medium text-xs">
