@@ -36,6 +36,35 @@ async def get_decision(
     return decision
 
 
+@router.get("/{dispute_id}/summary")
+async def get_case_summary(
+    dispute_id: str,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Return a lightweight summary card for a resolved case."""
+    case_repo = CaseFileRepository(session)
+    decision_repo = DecisionRepository(session)
+    case_file = await case_repo.get(dispute_id)
+    decision = await decision_repo.get_by_dispute(dispute_id)
+
+    if case_file is None and decision is None:
+        raise HTTPException(status_code=404, detail="No data found for this dispute")
+
+    return {
+        "dispute_id": dispute_id,
+        "order_value": case_file.order_value if case_file else None,
+        "dispute_type": case_file.dispute_type.value if case_file else None,
+        "evidence_count": len(case_file.evidence) if case_file else 0,
+        "hard_contradictions": len(case_file.hard_contradictions) if case_file else 0,
+        "gate_result": decision.gate_result.value if decision else None,
+        "resolution": decision.verdict.resolution.value if decision else None,
+        "confidence": decision.verdict.confidence if decision else None,
+        "has_ghost_cases": bool(decision and decision.ghost_case_result and decision.ghost_case_result.synthetic_evidence),
+        "stability_score": decision.stability_result.stability_score if decision and decision.stability_result else None,
+        "skeptic_contested": decision.skeptic_result.verdict_contested if decision and decision.skeptic_result else None,
+    }
+
+
 @router.get("/{dispute_id}/claims")
 async def get_claims(
     dispute_id: str,
