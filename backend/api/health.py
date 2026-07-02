@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+import platform
 import sys
+import time
 
 from fastapi import APIRouter
 
@@ -11,16 +13,29 @@ from config import settings
 
 router = APIRouter(tags=["health"])
 
+_START_TIME = time.time()
+VERSION = "1.2.0"
+
 
 @router.get("/health")
 async def health() -> dict:
     return {
         "status": "ok",
         "service": "liquet",
-        "version": "1.1.0",
+        "version": VERSION,
         "env": settings.app_env,
         "region": os.getenv("ALIBABA_REGION", "local"),
-        "features": ["ghost_cases", "stability_scoring", "skeptic_pass", "seller_risk"],
+        "uptime_seconds": round(time.time() - _START_TIME),
+        "features": [
+            "ghost_cases",
+            "stability_scoring",
+            "skeptic_pass",
+            "seller_risk",
+            "reviewer_notes",
+            "daily_metrics",
+            "confidence_histogram",
+            "batch_disputes",
+        ],
     }
 
 
@@ -28,7 +43,7 @@ async def health() -> dict:
 async def system_info() -> dict:
     return {
         "service": "Liquet",
-        "version": "1.1.0",
+        "version": VERSION,
         "description": "Autonomous marketplace dispute-resolution agent",
         "models": {
             "reasoning": settings.model_reasoning,
@@ -42,10 +57,15 @@ async def system_info() -> dict:
             "ghost_cases": "Cross-dispute seller pattern mining",
             "stability_scoring": "3x shuffled adjudication with variance-weighted confidence",
             "skeptic_pass": "Adversarial devil-advocate rebuttal challenge",
-            "seller_risk": "Seller dispute rate analytics",
+            "seller_risk": "Seller dispute rate analytics with per-seller drill-down",
+            "reviewer_notes": "Human annotator notes on any case",
+            "daily_metrics": "Day-by-day volume and resolution trends",
+            "confidence_histogram": "Distribution of verdict confidence scores",
         },
         "mcp_servers": 7,
         "python": sys.version.split()[0],
+        "platform": platform.system(),
+        "uptime_seconds": round(time.time() - _START_TIME),
         "docs": "/docs",
     }
 
