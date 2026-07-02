@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SkeletonStatGrid, SkeletonTableRows } from '../components/Skeleton.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 
@@ -77,6 +77,8 @@ export default function Dashboard() {
   const [error, setError] = useState(null)
   const [filter, setFilter] = useState('')
   const [search, setSearch] = useState('')
+  const [searchParams] = useSearchParams()
+  const sellerIdParam = searchParams.get('seller_id') || ''
 
   const refresh = React.useCallback(() => {
     Promise.all([
@@ -97,6 +99,7 @@ export default function Dashboard() {
 
   const filtered = disputes
     .filter(d => !filter || d.status === filter)
+    .filter(d => !sellerIdParam || d.seller_id === sellerIdParam)
     .filter(d => !search || d.order_id.toLowerCase().includes(search.toLowerCase()) ||
       d.id.toLowerCase().includes(search.toLowerCase()) ||
       d.dispute_type.includes(search.toLowerCase()))
@@ -197,6 +200,14 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* Seller filter banner */}
+      {sellerIdParam && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-4 text-sm text-blue-700 flex items-center justify-between">
+          <span>Showing disputes for seller <span className="font-mono font-bold">{sellerIdParam}</span></span>
+          <Link to="/dashboard" className="text-blue-500 hover:underline text-xs">Clear filter</Link>
+        </div>
+      )}
 
       {/* Table */}
       {loading && <><SkeletonStatGrid /><SkeletonTableRows /></>}
