@@ -42,10 +42,46 @@ function MCPStatusRow({ name, data }) {
   )
 }
 
+function DailyBarChart({ data, label }) {
+  if (!data || data.length === 0) return null
+  const max = Math.max(...data.map(d => d.count), 1)
+  const H = 60, W = 400
+  const barW = Math.max(2, Math.floor(W / data.length) - 1)
+
+  return (
+    <div>
+      <div className="text-xs font-medium text-gray-500 mb-2">{label}</div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-16">
+        {data.map((d, i) => {
+          const h = Math.max(2, Math.round((d.count / max) * (H - 4)))
+          return (
+            <rect
+              key={d.date}
+              x={i * (barW + 1)}
+              y={H - h}
+              width={barW}
+              height={h}
+              fill="#3b82f6"
+              opacity={0.7}
+            >
+              <title>{d.date}: {d.count}</title>
+            </rect>
+          )
+        })}
+      </svg>
+      <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+        <span>{data[0]?.date}</span>
+        <span>{data[data.length - 1]?.date}</span>
+      </div>
+    </div>
+  )
+}
+
 export default function Analytics() {
   const [stats, setStats] = useState(null)
   const [mcpStatus, setMcpStatus] = useState(null)
   const [sellerRisk, setSellerRisk] = useState([])
+  const [dailyMetrics, setDailyMetrics] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -53,10 +89,12 @@ export default function Analytics() {
       fetch('/api/stats').then(r => r.ok ? r.json() : null),
       fetch('/api/mcp-status').then(r => r.ok ? r.json() : null),
       fetch('/api/seller-risk').then(r => r.ok ? r.json() : []),
-    ]).then(([statsData, mcpData, riskData]) => {
+      fetch('/api/metrics/daily?days=30').then(r => r.ok ? r.json() : null),
+    ]).then(([statsData, mcpData, riskData, daily]) => {
       setStats(statsData)
       setMcpStatus(mcpData)
       setSellerRisk(riskData || [])
+      setDailyMetrics(daily)
       setLoading(false)
     })
   }, [])
@@ -85,6 +123,14 @@ export default function Analytics() {
         <MetricCard label="Avg confidence" value={`${avgConf}%`} sub="across all verdicts" color="text-blue-600" />
         <MetricCard label="High-risk sellers" value={highRisk} sub="recurring pattern ≥70%" color="text-red-600" />
       </div>
+
+      {/* Daily submissions chart */}
+      {dailyMetrics?.submissions?.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mb-6">
+          <div className="font-bold text-gray-900 mb-4">Daily Dispute Volume (last 30 days)</div>
+          <DailyBarChart data={dailyMetrics.submissions} label="Disputes submitted per day" />
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         {/* Gate distribution */}
