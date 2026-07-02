@@ -6,6 +6,7 @@ import SkepticPanel from '../components/SkepticPanel.jsx'
 import ConfidenceBreakdown from '../components/ConfidenceBreakdown.jsx'
 import AuditTimeline from '../components/AuditTimeline.jsx'
 import SellerReplyForm from '../components/SellerReplyForm.jsx'
+import ReviewerNotes from '../components/ReviewerNotes.jsx'
 
 function ConfidenceBar({ value }) {
   const pct = Math.round(value * 100)
@@ -352,6 +353,15 @@ export default function CaseDetail() {
       {/* Evidence */}
       {caseFile && caseFile.evidence?.length > 0 && (
         <EvidenceSection evidence={caseFile.evidence} hardContradictions={caseFile.hard_contradictions} />
+      )}
+
+      {/* Reviewer notes */}
+      {decision && (
+        <ReviewerNotes
+          disputeId={disputeId}
+          auditTrail={audit}
+          onNoteAdded={() => load(true)}
+        />
       )}
 
       {/* Audit trail — live-updating while agent runs */}
