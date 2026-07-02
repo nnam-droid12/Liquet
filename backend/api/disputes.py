@@ -55,6 +55,20 @@ async def list_disputes(
     return disputes
 
 
+@router.get("/count")
+async def count_disputes(
+    status: Optional[str] = None,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Return a lightweight count of disputes, optionally filtered by status."""
+    from sqlalchemy import func
+    q = select(func.count()).select_from(DisputeRow)
+    if status:
+        q = q.where(DisputeRow.status == status)
+    result = await session.execute(q)
+    return {"count": result.scalar() or 0, "status": status or "all"}
+
+
 @router.get("/recent", response_model=list[Dispute])
 async def list_recent_disputes(
     limit: int = 5,
