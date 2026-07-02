@@ -55,6 +55,21 @@ async def list_disputes(
     return disputes
 
 
+@router.get("/recent", response_model=list[Dispute])
+async def list_recent_disputes(
+    limit: int = 5,
+    session: AsyncSession = Depends(get_session),
+) -> list[Dispute]:
+    """Return the N most recently created disputes."""
+    from sqlalchemy import desc
+    limit = max(1, min(limit, 50))
+    result = await session.execute(
+        select(DisputeRow).order_by(desc(DisputeRow.created_at)).limit(limit)
+    )
+    repo = DisputeRepository(session)
+    return [repo._row_to_model(r) for r in result.scalars()]
+
+
 @router.get("/{dispute_id}", response_model=Dispute)
 async def get_dispute(
     dispute_id: str,
