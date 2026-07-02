@@ -67,6 +67,22 @@ async def get_dispute(
     return dispute
 
 
+@router.delete("/{dispute_id}", status_code=204)
+async def close_dispute(
+    dispute_id: str,
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    """Soft-close a dispute (status → closed). Does not delete the record."""
+    repo = DisputeRepository(session)
+    dispute = await repo.get(dispute_id)
+    if dispute is None:
+        raise HTTPException(status_code=404, detail="Dispute not found")
+    if dispute.status == DisputeStatus.CLOSED:
+        return  # idempotent
+    await repo.update_status(dispute_id, DisputeStatus.CLOSED)
+    logger.info("dispute_closed", dispute_id=dispute_id)
+
+
 @router.patch("/{dispute_id}", response_model=Dispute)
 async def patch_dispute(
     dispute_id: str,
