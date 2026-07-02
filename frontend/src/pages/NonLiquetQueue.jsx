@@ -121,6 +121,8 @@ export default function NonLiquetQueue() {
   const [queue, setQueue] = useState([])
   const [loading, setLoading] = useState(true)
   const [resolved, setResolved] = useState([])
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [sortBy, setSortBy] = useState('value')
 
   const load = () => {
     fetch('/api/queue/')
@@ -154,7 +156,7 @@ export default function NonLiquetQueue() {
         </p>
       </div>
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 border border-amber-300 rounded-md font-bold text-sm">
           ⚠ NON LIQUET — {queue.length} pending
         </span>
@@ -162,6 +164,58 @@ export default function NonLiquetQueue() {
           <span className="text-sm text-green-600">✓ {resolved.length} resolved this session</span>
         )}
       </div>
+
+      {/* Filter + sort controls */}
+      {queue.length > 0 && (() => {
+        const types = ['all', ...new Set(queue.map(b => b.dispute_type))]
+        const visibleQueue = queue
+          .filter(b => typeFilter === 'all' || b.dispute_type === typeFilter)
+          .sort((a, b) => sortBy === 'value'
+            ? (b.order_value || 0) - (a.order_value || 0)
+            : (b.leaning_confidence || 0) - (a.leaning_confidence || 0))
+
+        return (
+          <>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex gap-1 flex-wrap">
+                {types.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeFilter(t)}
+                    className={`text-xs px-2 py-1 rounded border transition-colors ${
+                      typeFilter === t
+                        ? 'bg-blue-700 text-white border-blue-700'
+                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {t === 'all' ? 'All types' : t.replace(/_/g, ' ')}
+                  </button>
+                ))}
+              </div>
+              <div className="ml-auto flex gap-1">
+                {['value', 'confidence'].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSortBy(s)}
+                    className={`text-xs px-2 py-1 rounded border transition-colors ${
+                      sortBy === s
+                        ? 'bg-gray-800 text-white border-gray-800'
+                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    Sort: {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-6">
+              {visibleQueue.map(brief => (
+                <ReviewCard key={brief.decision_id} brief={brief} onResolve={handleResolve} />
+              ))}
+            </div>
+          </>
+        )
+      })()}
 
       {loading && <div className="text-gray-500 text-center py-8">Loading queue…</div>}
 
@@ -175,12 +229,6 @@ export default function NonLiquetQueue() {
           </div>
         </div>
       )}
-
-      <div className="space-y-6">
-        {queue.map(brief => (
-          <ReviewCard key={brief.decision_id} brief={brief} onResolve={handleResolve} />
-        ))}
-      </div>
     </div>
   )
 }
