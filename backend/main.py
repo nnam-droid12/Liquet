@@ -27,6 +27,8 @@ from backend.api.export import router as export_router
 from backend.api.policy import router as policy_router
 from backend.api.mcp_status import router as mcp_status_router
 from backend.api.batch import router as batch_router
+from backend.api.metrics import router as metrics_router
+from backend.middleware.request_id import RequestIDMiddleware
 from backend.repositories.database import init_db
 from config import settings
 
@@ -77,6 +79,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RequestIDMiddleware)
 
 app.include_router(health_router)
 app.include_router(disputes_router, prefix="/api/disputes", tags=["disputes"])
@@ -89,6 +92,7 @@ app.include_router(export_router, tags=["export"])
 app.include_router(policy_router, tags=["policy"])
 app.include_router(mcp_status_router, tags=["mcp"])
 app.include_router(batch_router, tags=["batch"])
+app.include_router(metrics_router, tags=["metrics"])
 
 
 if __name__ == "__main__":
