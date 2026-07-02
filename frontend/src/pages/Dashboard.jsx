@@ -68,6 +68,8 @@ export default function Dashboard() {
   const [error, setError] = useState(null)
   const [filter, setFilter] = useState('')
   const [search, setSearch] = useState('')
+  const [bulkRunning, setBulkRunning] = useState(false)
+  const [bulkResult, setBulkResult] = useState(null)
   const [searchParams] = useSearchParams()
   const sellerIdParam = searchParams.get('seller_id') || ''
 
@@ -108,6 +110,26 @@ export default function Dashboard() {
   )
   const avgConf = platformStats ? Math.round(platformStats.avg_confidence * 100) : 0
 
+  const handleBulkInvestigate = async () => {
+    const openOnes = disputes.filter(d => d.status === 'open')
+    if (!openOnes.length) return
+    setBulkRunning(true)
+    setBulkResult(null)
+    let ok = 0, failed = 0
+    for (const d of openOnes) {
+      try {
+        const r = await fetch(`/api/disputes/${d.id}/investigate`, { method: 'POST' })
+        if (r.ok || r.status === 202) ok++
+        else failed++
+      } catch {
+        failed++
+      }
+    }
+    setBulkRunning(false)
+    setBulkResult({ ok, failed })
+    refresh()
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -117,13 +139,30 @@ export default function Dashboard() {
             LIQUET resolves autonomously · NON LIQUET escalates to human review
           </p>
         </div>
-        <Link
-          to="/new"
-          className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition-colors"
-        >
-          + New Dispute
-        </Link>
+        <div className="flex items-center gap-2">
+          {disputes.filter(d => d.status === 'open').length > 0 && (
+            <button
+              onClick={handleBulkInvestigate}
+              disabled={bulkRunning}
+              className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-md text-sm font-medium disabled:opacity-50 transition-colors"
+              title="Run autopilot on all open disputes"
+            >
+              {bulkRunning ? '⟳ Running…' : `⚡ Bulk Run (${disputes.filter(d => d.status === 'open').length})`}
+            </button>
+          )}
+          <Link
+            to="/new"
+            className="bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition-colors"
+          >
+            + New Dispute
+          </Link>
+        </div>
       </div>
+      {bulkResult && (
+        <div className={`rounded-lg px-4 py-2 mb-4 text-sm ${bulkResult.failed === 0 ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
+          Bulk run complete: {bulkResult.ok} dispatched, {bulkResult.failed} failed
+        </div>
+      )}
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
