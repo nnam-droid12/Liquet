@@ -82,17 +82,6 @@ graph TB
 
 ---
 
-## How This Maps to the Judging Rubric
-
-| Rubric Block | Weight | Liquet's Approach |
-|---|---|---|
-| **Technical Depth & Engineering** | 30% | Two-model QwenCloud design (qwen3.7-max + qwen3.6-plus) with separated perception/judgment roles; 7 independent MCP servers as tools; calibrated confidence with ECE measurement; typed Pydantic v2 at every boundary; async FastAPI + SQLAlchemy; full eval harness with baseline comparison |
-| **Innovation & AI Creativity** | 30% | The Liquet/NON_LIQUET gate — calibrated abstention as the core product behavior (not a side feature); evidence reliability hierarchy as structured signal to the LLM; hard-contradiction detection triggering mandatory escalation; novel two-model architecture splitting vision from reasoning |
-| **Problem Value & Impact** | 25% | Online marketplace dispute resolution affects hundreds of millions of transactions annually — squarely Alibaba's world. The economic thesis: auto-resolve 50–80% of cases without human adjudicators, escalate only the genuinely uncertain ones. Liquet's audit trail and cited rationales make automated decisions defensible at scale. |
-| **Presentation & Documentation** | 15% | Architecture diagram; visualized evidence→verdict→gate flow in the UI; shot-by-shot demo script; submission description; blog post; comprehensive README with rubric mapping |
-
----
-
 ## Proof of Alibaba Cloud Deployment
 
 **Proof file:** [`deployment/alibaba_cloud_integration.py`](deployment/alibaba_cloud_integration.py)
@@ -182,14 +171,6 @@ python eval/run_eval.py
 ```bash
 pytest tests/ -v
 ```
-
----
-
-## Demo Video
-
-[ADD YOUTUBE/VIMEO DEMO VIDEO URL HERE]
-
-Script: [`docs/demo_script.md`](docs/demo_script.md)
 
 ---
 
