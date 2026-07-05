@@ -35,6 +35,8 @@ from backend.api.readiness import router as readiness_router
 from backend.api.narrate import router as narrate_router
 from backend.api.visualize import router as visualize_router
 from backend.api.reasoning_ws import router as reasoning_ws_router
+from backend.api.email_intake import router as email_intake_router
+from backend.api.approval import router as approval_router
 from backend.middleware.request_id import RequestIDMiddleware
 from backend.repositories.database import init_db
 from config import settings
@@ -66,9 +68,22 @@ async def lifespan(app: FastAPI):
         f"  Track 4: Autopilot Agent | QwenCloud Hackathon\n"
         f"  Env: {settings.app_env} | Region: {os.getenv('ALIBABA_REGION', 'local')}\n"
         f"  Conf threshold: {settings.conf_threshold} | Value threshold: ${settings.value_threshold}\n"
+        f"  Email polling: {'ON' if settings.email_polling_enabled else 'OFF'}\n"
         f"{'='*60}\n"
     )
+
+    # Start email intake poller as background task if configured
+    poller_task = None
+    if settings.email_polling_enabled and settings.email_imap_user:
+        import asyncio
+        from backend.services.email_service import run_email_poller
+        poller_task = asyncio.create_task(run_email_poller())
+        logger.info("email_poller_task_started")
+
     yield
+
+    if poller_task:
+        poller_task.cancel()
     logger.info("Liquet shutting down")
 
 
@@ -107,6 +122,8 @@ app.include_router(readiness_router)
 app.include_router(narrate_router, tags=["creative"])
 app.include_router(visualize_router, tags=["creative"])
 app.include_router(reasoning_ws_router, tags=["creative"])
+app.include_router(email_intake_router, tags=["automation"])
+app.include_router(approval_router, tags=["automation"])
 
 
 if __name__ == "__main__":

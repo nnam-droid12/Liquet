@@ -9,6 +9,7 @@ import SellerRisk from './pages/SellerRisk.jsx'
 import PolicyBrowser from './pages/PolicyBrowser.jsx'
 import Analytics from './pages/Analytics.jsx'
 import Timeline from './pages/Timeline.jsx'
+import Automation from './pages/Automation.jsx'
 
 function NavItem({ to, children }) {
   return (
@@ -47,6 +48,7 @@ function AppShell({ children }) {
             <div className="hidden lg:flex gap-2">
               <NavItem to="/dashboard">Dashboard</NavItem>
               <NavItem to="/analytics">Analytics</NavItem>
+              <NavItem to="/automation">Automation</NavItem>
               <NavItem to="/queue">Queue</NavItem>
               <NavItem to="/seller-risk">Seller Risk</NavItem>
               <NavItem to="/timeline">Timeline</NavItem>
@@ -82,6 +84,7 @@ function AppShell({ children }) {
             {[
               { to: '/dashboard', label: 'Dashboard' },
               { to: '/analytics', label: 'Analytics' },
+              { to: '/automation', label: 'Automation' },
               { to: '/queue', label: 'NON LIQUET Queue' },
               { to: '/seller-risk', label: 'Seller Risk' },
               { to: '/timeline', label: 'Timeline' },
@@ -151,6 +154,7 @@ export default function App() {
         <Route path="/queue" element={<NonLiquetQueue />} />
         <Route path="/seller-risk" element={<SellerRisk />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/automation" element={<Automation />} />
         <Route path="/policy" element={<PolicyBrowser />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/new" element={<NewDispute />} />

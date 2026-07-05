@@ -60,6 +60,30 @@ class Settings(BaseSettings):
     policy_engine_port: int = 8006
     resolution_service_port: int = 8007
 
+    # ── Email intake (IMAP) ────────────────────────────────────────────────────
+    email_polling_enabled: bool = False
+    email_imap_host: str = "imap.gmail.com"
+    email_imap_port: int = 993
+    email_imap_user: str = ""
+    email_imap_password: str = ""          # Gmail: use an App Password
+    email_poll_interval_seconds: int = 60
+
+    # ── Email sending (SMTP) ───────────────────────────────────────────────────
+    email_smtp_host: str = "smtp.gmail.com"
+    email_smtp_port: int = 587
+    email_smtp_user: str = ""
+    email_smtp_password: str = ""
+    email_from: str = "Liquet Disputes <noreply@liquet.ai>"
+    reviewer_email: str = ""               # Where NON LIQUET escalation alerts go
+
+    # ── Webhooks ───────────────────────────────────────────────────────────────
+    resolution_webhook_url: str = ""       # POST when LIQUET auto-resolves
+    escalation_webhook_url: str = ""       # POST when NON LIQUET escalates
+
+    # ── Human approval ─────────────────────────────────────────────────────────
+    approval_secret: str = "change-me"
+    app_base_url: str = "http://localhost:8000"
+
     # ── Paths ──────────────────────────────────────────────────────────────────
     root_dir: Path = Path(__file__).parent
     data_dir: Path = Path(__file__).parent / "data"

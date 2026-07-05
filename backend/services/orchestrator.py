@@ -156,6 +156,21 @@ class DisputeOrchestrator:
                 "gate": "LIQUET",
                 "resolution": verdict.resolution.value,
             })
+            try:
+                from backend.services.resolution_executor import notify_resolution
+                await notify_resolution(
+                    dispute_id=dispute.id,
+                    order_id=dispute.order_id,
+                    resolution=verdict.resolution.value,
+                    confidence=verdict.confidence,
+                    rationale=verdict.rationale,
+                    amount=case_file.order_value,
+                    buyer_id=dispute.buyer_id,
+                    seller_id=dispute.seller_id,
+                    buyer_email=dispute.metadata.get("reply_to", ""),
+                )
+            except Exception as exc:
+                log.warning("resolution_notify_failed", error=str(exc))
         else:
             await self._escalate_to_human(dispute, case_file, verdict, decision, abstention_reason)
             await self.dispute_repo.update_status(dispute.id, DisputeStatus.ESCALATED)
@@ -163,6 +178,22 @@ class DisputeOrchestrator:
                 "gate": "NON_LIQUET",
                 "reason": abstention_reason,
             })
+            try:
+                from backend.services.resolution_executor import notify_escalation
+                await notify_escalation(
+                    dispute_id=dispute.id,
+                    decision_id=decision.id,
+                    order_id=dispute.order_id,
+                    order_value=case_file.order_value,
+                    dispute_type=dispute.dispute_type.value,
+                    leaning_verdict=verdict.resolution.value,
+                    leaning_confidence=verdict.confidence,
+                    abstention_reason=abstention_reason or "Confidence below threshold",
+                    buyer_narrative=dispute.buyer_narrative,
+                    seller_narrative=dispute.seller_narrative or "",
+                )
+            except Exception as exc:
+                log.warning("escalation_notify_failed", error=str(exc))
 
         log.info("orchestrator_complete", gate=gate_result.value)
         return decision
