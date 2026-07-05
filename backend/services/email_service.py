@@ -101,11 +101,16 @@ def send_email(to: str, subject: str, html: str) -> None:
         msg["From"] = settings.email_from
         msg["To"] = to
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP(settings.email_smtp_host, settings.email_smtp_port) as s:
-            s.ehlo()
-            s.starttls()
-            s.login(settings.email_smtp_user, settings.email_smtp_password)
-            s.sendmail(settings.email_smtp_user, to, msg.as_string())
+        if settings.email_smtp_port == 465:
+            with smtplib.SMTP_SSL(settings.email_smtp_host, settings.email_smtp_port) as s:
+                s.login(settings.email_smtp_user, settings.email_smtp_password)
+                s.sendmail(settings.email_smtp_user, to, msg.as_string())
+        else:
+            with smtplib.SMTP(settings.email_smtp_host, settings.email_smtp_port) as s:
+                s.ehlo()
+                s.starttls()
+                s.login(settings.email_smtp_user, settings.email_smtp_password)
+                s.sendmail(settings.email_smtp_user, to, msg.as_string())
         logger.info("email_sent", to=to, subject=subject)
     except Exception as exc:
         logger.error("email_send_failed", to=to, error=str(exc))

@@ -70,7 +70,7 @@ class Settings(BaseSettings):
 
     # ── Email sending (SMTP) ───────────────────────────────────────────────────
     email_smtp_host: str = "smtp.gmail.com"
-    email_smtp_port: int = 587
+    email_smtp_port: int = 465
     email_smtp_user: str = ""
     email_smtp_password: str = ""
     email_from: str = "Liquet Disputes <noreply@liquet.ai>"
