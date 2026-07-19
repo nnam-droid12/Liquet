@@ -7,9 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue)](https://python.org)
 [![QwenCloud](https://img.shields.io/badge/Powered%20by-QwenCloud-orange)](https://dashscope-intl.aliyuncs.com)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-liquet.43.98.167.71.sslip.io-brightgreen)](http://liquet.43.98.167.71.sslip.io)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-liquet.8--219--72--137.nip.io-brightgreen)](https://liquet.8-219-72-137.nip.io)
 
-**Live demo:** [http://liquet.43.98.167.71.sslip.io](http://liquet.43.98.167.71.sslip.io) — deployed on Alibaba Cloud ECS (Singapore)
+**Live demo:** [https://liquet.8-219-72-137.nip.io](https://liquet.8-219-72-137.nip.io) — deployed on Alibaba Cloud ECS (Singapore)
 
 ---
 
@@ -29,12 +29,18 @@ An agent that *knows when it cannot be sure* is the whole point — never force 
 ## Features
 
 - **Autopilot orchestration** — plans and executes multi-step evidence gathering via 7 MCP tool servers, assembles a CaseFile, adjudicates with qwen3.7-max, applies the Liquet gate, and either resolves or escalates — all without human involvement on clear cases
-- **Two-model design** — qwen3.6-plus handles visual evidence intake (photo analysis, damage detection); qwen3.7-max handles reasoning, policy application, and verdict generation. Perception and judgment are cleanly separated.
+- **Three-model pipeline** — qwen3.6-flash (fast triage/pre-classification) → qwen3.6-plus (visual evidence intake, photo analysis, damage detection) → qwen3.7-max (reasoning, policy application, verdict generation). Each model handles only what it is best suited for.
 - **Evidence reliability hierarchy** — carrier scan (95%) > order record (90%) > listing data (85%) > photo (70%) > message thread (40%) > unverified claim (20%). Missing evidence lowers confidence, never crashes the run.
 - **Calibrated abstention** — calibrated confidence scores, not just thresholds. ECE of 0.015 vs 0.142 for the naive baseline.
 - **Hard contradiction detection** — if two evidence items are mutually exclusive and both credible, the case escalates rather than forcing a guess
 - **Human-in-the-loop queue** — NON LIQUET cases arrive with a one-screen decision brief: both narratives, the evidence map, the agent's lean, and exactly why it abstained
 - **Full audit trail** — every agent step, tool call, and human action is logged immutably with provenance
+- **Email intake** — IMAP poller monitors a Gmail inbox; any structured dispute email is parsed by qwen3.7-max and auto-submitted as a new case, closing the intake loop end-to-end
+- **Resolution webhooks** — LIQUET decisions fire a signed POST to a configurable webhook URL; NON LIQUET escalations fire a separate URL so external systems can react programmatically
+- **One-click human approval** — HMAC-SHA256 signed approval links emailed to reviewers; a single click approves or overrides the agent's recommendation and updates the case status
+- **VerdictNarrator** — cosyvoice-v3-plus TTS reads the verdict rationale aloud with an animated waveform
+- **SceneReconstruction** — wan2.6-t2i generates a visual scene from the dispute facts so reviewers can immediately picture the conflict
+- **ReasoningGlass** — streams qwen3.7-max extended-thinking tokens live in a dark terminal with typewriter effect, showing the full reasoning chain before the verdict
 - **Alibaba Cloud OSS** — dispute evidence images stored on Alibaba Cloud Object Storage; production database on Alibaba Cloud RDS
 
 ---
@@ -61,8 +67,11 @@ graph TB
         RS["resolution_service"]
     end
     subgraph "QwenCloud"
-        QR["qwen3.7-max\nReasoning"]
+        QF["qwen3.6-flash\nTriage"]
         QV["qwen3.6-plus\nVision"]
+        QR["qwen3.7-max\nReasoning"]
+        TTS["cosyvoice-v3-plus\nVerdictNarrator"]
+        T2I["wan2.6-t2i\nSceneReconstruction"]
     end
     subgraph "Alibaba Cloud"
         OSS["OSS\nEvidence Images"]
@@ -73,9 +82,11 @@ graph TB
     Orch --> OS & LS & LST & CS & VI & PE
     Gate -->|LIQUET| RS
     Gate -->|NON_LIQUET| UI
+    Orch --> QF
     Adj --> QR
     VI --> QV
     VI --> OSS
+    API --> TTS & T2I
 ```
 
 *Full diagram: [`docs/architecture.mmd`](docs/architecture.mmd)*
@@ -94,7 +105,7 @@ This file demonstrates:
 
 **Deployment guide:** [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — full step-by-step ECS provisioning, OSS bucket setup, RDS configuration, and docker-compose deployment.
 
-**Proof recording:** [ADD ALIBABA CLOUD DEPLOYMENT PROOF URL HERE]
+**Live deployment:** [https://liquet.8-219-72-137.nip.io](https://liquet.8-219-72-137.nip.io) — ECS Singapore, running the full three-model pipeline.
 
 ---
 
@@ -250,8 +261,9 @@ liquet/
 | Variable | Default | Description |
 |---|---|---|
 | `QWEN_API_KEY` | — | QwenCloud API key (required) |
-| `model_reasoning` | `qwen-plus` | Adjudication model (set to `qwen3.7-max` when available) |
-| `model_vision` | `qwen-vl-plus` | Vision model (set to `qwen3.6-plus`) |
+| `model_reasoning` | `qwen3.7-max` | Adjudication, reasoning glass, email parse |
+| `model_vision` | `qwen3.6-plus` | Vision intake, photo analysis |
+| `model_triage` | `qwen3.6-flash` | Fast pre-classification, batch triage |
 | `CONF_THRESHOLD` | `0.80` | Confidence required for LIQUET |
 | `VALUE_THRESHOLD` | `500.00` | Max order value for autonomous resolution |
 | `CHEAP_MODE` | `false` | Route all calls through vision model to save credits |
