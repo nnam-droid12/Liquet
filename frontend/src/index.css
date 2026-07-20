@@ -1,7 +1,369 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
+:root {
+  --bg-base:     #F4F7FB;
+  --bg-surface:  #FFFFFF;
+  --bg-elevated: #EDF1F8;
+  --bg-hover:    #E4EAF4;
+  --border:      rgba(30,50,100,0.08);
+  --border-mid:  rgba(30,50,100,0.13);
+  --border-hi:   rgba(30,50,100,0.22);
+  --accent:      #2563EB;
+  --accent-dim:  rgba(37,99,235,0.07);
+  --accent-glow: rgba(37,99,235,0.18);
+  --green:       #059669;
+  --green-dim:   rgba(5,150,105,0.08);
+  --amber:       #B45309;
+  --amber-dim:   rgba(180,83,9,0.08);
+  --red:         #DC2626;
+  --red-dim:     rgba(220,38,38,0.08);
+  --text-1:      #111827;
+  --text-2:      #4B5563;
+  --text-3:      #9CA3AF;
+  --radius:      10px;
+  --radius-lg:   14px;
+  --font-sans:   'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; color-scheme: light; scroll-behavior: smooth; }
+
 body {
-  @apply bg-gray-50 text-gray-900 font-sans;
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.55;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-sans);
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+  color: var(--text-1);
+  margin: 0;
+  text-wrap: balance;
+}
+
+code, pre, .font-mono, [class*='font-mono'] {
+  font-family: var(--font-mono) !important;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(30,50,100,0.14); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(30,50,100,0.26); }
+
+/* ─── Focus & selection ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent-glow);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+::selection { background: rgba(37,99,235,0.15); color: var(--text-1); }
+
+/* ─── Animations ────────────────────────────────────────────────────────── */
+@keyframes lq-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes lq-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes lq-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.30; }
+}
+@keyframes lq-ping {
+  75%,100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes lq-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+@keyframes lq-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes lq-glow {
+  0%,100% { box-shadow: 0 0 0   0px var(--accent-glow); }
+  50%      { box-shadow: 0 0 14px 2px var(--accent-glow); }
+}
+
+.lq-slide-up { animation: lq-slide-up 0.22s cubic-bezier(0.16,1,0.3,1) both; }
+.lq-fade-in  { animation: lq-fade-in  0.18s ease-out both; }
+.lq-pulse    { animation: lq-pulse    2.4s ease-in-out infinite; }
+.lq-ping     { animation: lq-ping     1.4s cubic-bezier(0,0,0.2,1) infinite; }
+.lq-spin     { animation: lq-spin     0.7s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lq-slide-up, .lq-fade-in { animation: none; }
+}
+
+/* ─── Skeleton ──────────────────────────────────────────────────────────── */
+.lq-skeleton {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+  background-size: 200% 100%;
+  animation: lq-shimmer 1.6s linear infinite;
+  border-radius: 6px;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+/* ─── Subtle dot-grid on the light background ───────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(30,50,100,0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+#root { position: relative; z-index: 1; }
+
+/* ─── Form elements ─────────────────────────────────────────────────────── */
+input:not([class*='lq-']),
+textarea:not([class*='lq-']),
+select:not([class*='lq-']) {
+  background: var(--bg-surface) !important;
+  color: var(--text-1) !important;
+  border-color: var(--border-mid) !important;
+}
+input::placeholder,
+textarea::placeholder { color: var(--text-3) !important; }
+
+/* Blue focus rings from Tailwind */
+.focus\:ring-2:focus { box-shadow: 0 0 0 3px var(--accent-glow) !important; }
+.focus\:ring-blue-500:focus { box-shadow: 0 0 0 3px var(--accent-glow) !important; }
+.focus\:border-blue-500:focus { border-color: rgba(37,99,235,0.4) !important; }
+
+/* ─── Card ──────────────────────────────────────────────────────────────── */
+.lq-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color 160ms;
+}
+.lq-card-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ─── Badge ─────────────────────────────────────────────────────────────── */
+.lq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.lq-badge-green { background: var(--green-dim); border: 1px solid rgba(16,185,129,0.22); color: var(--green); }
+.lq-badge-amber { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.22); color: var(--amber); }
+.lq-badge-blue  { background: var(--accent-dim); border: 1px solid rgba(91,142,248,0.22); color: var(--accent); }
+.lq-badge-gray  { background: rgba(30,50,100,0.05); border: 1px solid var(--border-mid); color: var(--text-2); }
+.lq-badge-red   { background: var(--red-dim); border: 1px solid rgba(248,113,113,0.22); color: var(--red); }
+
+/* ─── Button ────────────────────────────────────────────────────────────── */
+.lq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 130ms, transform 80ms, opacity 140ms, border-color 130ms;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  line-height: 1;
+}
+.lq-btn:active { transform: scale(0.97); }
+.lq-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.lq-btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.lq-btn-primary { background: var(--accent); color: #fff; }
+.lq-btn-primary:hover:not(:disabled) { background: #6B9EFF; }
+
+.lq-btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border-mid); }
+.lq-btn-ghost:hover:not(:disabled) { background: rgba(30,50,100,0.04); color: var(--text-1); border-color: var(--border-hi); }
+
+.lq-btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.20); }
+.lq-btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.18); }
+
+.lq-btn-amber  { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,0.22); }
+.lq-btn-amber:hover:not(:disabled) { background: rgba(245,158,11,0.18); }
+
+.lq-btn-green  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.22); }
+.lq-btn-green:hover:not(:disabled) { background: rgba(16,185,129,0.18); }
+
+/* ─── Form ──────────────────────────────────────────────────────────────── */
+.lq-input {
+  display: block;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--text-1);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  transition: border-color 140ms, box-shadow 140ms;
+  line-height: 1.4;
+}
+.lq-input::placeholder { color: var(--text-3); }
+.lq-input:focus {
+  outline: none;
+  border-color: rgba(91,142,248,0.45);
+  box-shadow: 0 0 0 3px rgba(91,142,248,0.07);
+}
+textarea.lq-input { resize: none; }
+select.lq-input { cursor: pointer; }
+
+.lq-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+/* ─── Table ─────────────────────────────────────────────────────────────── */
+.lq-table { width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; border-collapse: collapse; }
+.lq-table th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.lq-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(30,50,100,0.06);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+.lq-table tbody tr:last-child td { border-bottom: none; }
+.lq-table tbody tr { transition: background 110ms; }
+.lq-table tbody tr:hover td { background: rgba(30,50,100,0.025); }
+
+/* ─── Confidence bar ────────────────────────────────────────────────────── */
+.lq-bar-track { height: 5px; background: rgba(30,50,100,0.09); border-radius: 3px; overflow: hidden; }
+.lq-bar-fill  {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.85s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ─── Status dot ────────────────────────────────────────────────────────── */
+.lq-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.lq-dot-open         { background: var(--text-3); }
+.lq-dot-investigating { background: var(--accent); }
+.lq-dot-resolved     { background: var(--green); }
+.lq-dot-escalated    { background: var(--amber); }
+.lq-dot-failed, .lq-dot-error { background: var(--red); }
+.lq-dot-closed       { background: var(--text-3); }
+
+/* ─── Sidebar layout ────────────────────────────────────────────────────── */
+.lq-sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 232px;
+  background: #FFFFFF;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  overflow: hidden;
+}
+.lq-content {
+  margin-left: 232px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.lq-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background 130ms, color 130ms;
+  position: relative;
+  margin-bottom: 1px;
+}
+.lq-nav-item:hover  { background: rgba(30,50,100,0.05); color: var(--text-1); }
+.lq-nav-item.active { background: var(--accent-dim); color: var(--accent); }
+
+@media (max-width: 1023px) {
+  .lq-sidebar {
+    transform: translateX(-100%);
+    transition: transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms;
+  }
+  .lq-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(30,50,100,0.12);
+  }
+  .lq-content { margin-left: 0; }
+}
+
+/* ─── Misc ──────────────────────────────────────────────────────────────── */
+.lq-divider { height: 1px; background: var(--border); margin: 0; }
+
+.lq-mono { font-family: var(--font-mono); }
+
+.lq-code-block {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+/* ─── Mobile topbar ─────────────────────────────────────────────────────── */
+/* Hidden by default on desktop; shown on mobile */
+.lq-mobile-topbar { display: none; }
+@media (max-width: 1023px) {
+  .lq-mobile-topbar { display: flex; }
+}
+
+/* ─── Landing specific ──────────────────────────────────────────────────── */
+.lq-hero-bg {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37,99,235,0.08) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 40% at 20% 60%, rgba(109,40,217,0.04) 0%, transparent 60%),
+              var(--bg-base);
 }
