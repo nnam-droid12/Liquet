@@ -47,6 +47,11 @@ An agent that *knows when it cannot be sure* is the whole point — never force 
 
 ## Architecture
 
+![Liquet Architecture](assets/liquet_architecture.png)
+
+<details>
+<summary>Mermaid source</summary>
+
 ```mermaid
 graph TB
     subgraph "Frontend"
@@ -89,7 +94,7 @@ graph TB
     API --> TTS & T2I
 ```
 
-*Full diagram: [`docs/architecture.mmd`](docs/architecture.mmd)*
+</details>
 
 ---
 
